@@ -3,18 +3,15 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#include "GreaperDisplayDLL.h"
+#include "GreaperGALDLL.h"
 #include "WindowManager.h"
-#include <Core/Platform.h>
-#include <Core/FileStream.h>
-#include <Core/Reflection/Property.h>
-#define GLFW_DLL
-#include <External/GLFW/glfw3.h>
+#include "../../GreaperCore/Public/Platform.h"
+#include "../../GreaperCore/Public/Property.h"
 
-#if GREAPER_DISP_DLL
+#if GREAPER_GAL_DLL
 
-greaper::SPtr<greaper::disp::GreaperDispLibrary> gDispLibrary{};
-extern greaper::SPtr<greaper::disp::WindowManager> gWindowManager;
+greaper::SPtr<greaper::gal::GreaperGALLibrary> gGALLibrary{};
+extern greaper::SPtr<greaper::gal::WindowManager> gWindowManager;
 
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
@@ -43,22 +40,22 @@ END_C
 
 void* _Greaper()
 {
-	if (gDispLibrary == nullptr)
+	if (gGALLibrary == nullptr)
 	{
-		gDispLibrary.reset(greaper::Construct<greaper::disp::GreaperDispLibrary>());
+		gGALLibrary.reset(greaper::Construct<greaper::gal::GreaperGALLibrary>());
 		greaper::OSPlatform::PerLibraryInit();
 	}
-	return &gDispLibrary;
+	return &gGALLibrary;
 }
 
 static void GLFWErrorReporter(int32 errorCode, const char* errorMessage)
 {
-	gDispLibrary->LogError(greaper::Format("GLFW error, code:%" PRIi32 " msg: %s.", errorCode, errorMessage));
+	gGALLibrary->LogError(greaper::Format("GLFW error, code:%" PRIi32 " msg: %s.", errorCode, errorMessage));
 }
 
-void greaper::disp::GreaperDispLibrary::Initialize() noexcept
+void greaper::gal::GreaperGALLibrary::Initialize() noexcept
 {
-	glfwSetErrorCallback(&GLFWErrorReporter);
+	/*glfwSetErrorCallback(&GLFWErrorReporter);
 	int major, minor, rev;
 	glfwGetVersion(&major, &minor, &rev);
 	Log(Format("Initializing GLFW %" PRIi32 ".%" PRIi32 ".%" PRIi32 "...", major, minor, rev));
@@ -68,10 +65,10 @@ void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 		const char* errorMsg;
 		auto errorCode = glfwGetError(&errorMsg);
 		Break("Couldn't initialize GLFW, error code:%" PRIi32 ", error msg: %s.", errorCode, errorMsg);
-	}
+	}*/
 }
 
-void greaper::disp::GreaperDispLibrary::AddManagers()noexcept
+void greaper::gal::GreaperGALLibrary::AddManagers()noexcept
 {
 	// add more managers
 	gWindowManager.reset(Construct<WindowManager>());
@@ -79,17 +76,17 @@ void greaper::disp::GreaperDispLibrary::AddManagers()noexcept
 
 }
 
-void greaper::disp::GreaperDispLibrary::RemoveManagers()noexcept
+void greaper::gal::GreaperGALLibrary::RemoveManagers()noexcept
 {
 	IGreaperLibrary::RemoveManagers();
 	gWindowManager.reset();
 }
 
-void greaper::disp::GreaperDispLibrary::Deinitialize()noexcept
+void greaper::gal::GreaperGALLibrary::Deinitialize()noexcept
 {
-	Log("Shutting down GLFW...");
-	glfwTerminate();
-	gDispLibrary.reset();
+	/*Log("Shutting down GLFW...");
+	glfwTerminate();*/
+	gGALLibrary.reset();
 }
 
 #else

@@ -5,16 +5,15 @@
 
 #pragma once
 
-#ifndef DISP_IMPL_PREREQUISITES_H
-#define DISP_IMPL_PREREQUISITES_H 1
+#ifndef GAL_IMPL_PREREQUISITES_H
+#define GAL_IMPL_PREREQUISITES_H 1
 
-#include <Display/DispPrerequisites.h>
+#include "../Public/GALPrerequisites.h"
 
-namespace greaper::disp
+namespace greaper::gal
 {
-	class GreaperDispLibrary;
+	class GreaperGALLibrary;
 	class WindowManager;
-	class GLFWWindow;
 }
 
-#endif /* DISP_IMPL_PREREQUISITES_H */
+#endif /* GAL_IMPL_PREREQUISITES_H */

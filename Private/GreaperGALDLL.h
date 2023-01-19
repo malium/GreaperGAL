@@ -5,23 +5,23 @@
 
 #pragma once
 
-#ifndef GREAPER_DISP_DLL_H
-#define GREAPER_DISP_DLL_H 1
+#ifndef GREAPER_GAL_DLL_H
+#define GREAPER_GAL_DLL_H 1
 
 #include "ImplPrerequisites.h"
-#include <Core/IGreaperLibrary.h>
+#include "../../GreaperCore/Public/IGreaperLibrary.h"
 
-#if GREAPER_DISP_DLL
+#if GREAPER_GAL_DLL
 
-namespace greaper::disp
+namespace greaper::gal
 {
-	class GreaperDispLibrary : public TGreaperLibrary<GreaperDispLibrary>
+	class GreaperGALLibrary : public TGreaperLibrary<GreaperGALLibrary>
 	{
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{ 0x5DECEE34, 0x86A911ED, 0xA1EB0242, 0xAC120002 };
 		static constexpr StringView LibraryName = "GreaperDisplay"sv;
 
-		GreaperDispLibrary() = default;
+		GreaperGALLibrary() = default;
 
 		void Initialize()noexcept override;
 
@@ -31,10 +31,10 @@ namespace greaper::disp
 
 		void Deinitialize()noexcept override;
 
-		uint32 GetLibraryVersion()const noexcept override { return GREAPER_DISP_VERSION; }
+		uint32 GetLibraryVersion()const noexcept override { return GREAPER_GAL_VERSION; }
 	};
 }
 
 #endif // GREAPER_DISP_DLL
 
-#endif /* GREAPER_DISP_DLL_H */
+#endif /* GREAPER_GAL_DLL_H */

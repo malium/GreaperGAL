@@ -5,20 +5,19 @@
 
 #pragma once
 
-#ifndef CORE_MONITOR_H
-#define CORE_MONITOR_H 1
+#ifndef GAL_MONITOR_H
+#define GAL_MONITOR_H 1
 
-#include "../DispPrerequisites.h"
-#include <Core/Base/Rect.h>
-#include <Math/Vector2.h>
+#include "../GALPrerequisites.h"
+#include "../../../GreaperMath/Public/Rect.h"
 #include "VideoMode.h"
 
-namespace greaper::disp
+namespace greaper::gal
 {
 	class Monitor
 	{
-		RectI m_SizeRect;
-		RectI m_WorkRect;
+		math::RectI m_SizeRect;
+		math::RectI m_WorkRect;
 		int32 m_Index;
 		String m_Name;
 		Vector<PVideoMode> m_VideoModes;
@@ -29,15 +28,15 @@ namespace greaper::disp
 
 	public:
 		Monitor()noexcept = default;
-		Monitor(RectI sizeRect, RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi)noexcept;
+		Monitor(math::RectI sizeRect, math::RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi)noexcept;
 		Monitor(const Monitor&) = default;
 		Monitor(Monitor&&)noexcept = default;
 		Monitor& operator=(const Monitor&) = default;
 		Monitor& operator=(Monitor&&)noexcept = default;
 
-		INLINE const RectI& GetSizeRect()const noexcept { return m_SizeRect; }
+		INLINE const math::RectI& GetSizeRect()const noexcept { return m_SizeRect; }
 
-		INLINE const RectI& GetWorkRect()const noexcept { return m_WorkRect; }
+		INLINE const math::RectI& GetWorkRect()const noexcept { return m_WorkRect; }
 
 		INLINE const String& GetName()const noexcept { return m_Name; }
 
@@ -56,7 +55,7 @@ namespace greaper::disp
 		INLINE PVideoMode GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
 	};
 
-	INLINE Monitor::Monitor(RectI sizeRect, RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi) noexcept
+	INLINE Monitor::Monitor(math::RectI sizeRect, math::RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi) noexcept
 		:m_SizeRect(std::move(sizeRect))
 		,m_WorkRect(std::move(workRect))
 		,m_Index(index)
@@ -71,4 +70,4 @@ namespace greaper::disp
 	}
 }
 
-#endif /* CORE_MONITOR_H */
+#endif /* GAL_MONITOR_H */

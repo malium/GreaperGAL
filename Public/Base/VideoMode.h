@@ -5,15 +5,14 @@
 
 #pragma once
 
-#ifndef DISP_VIDEO_MODE_H
-#define DISP_VIDEO_MODE_H 1
+#ifndef GAL_VIDEO_MODE_H
+#define GAL_VIDEO_MODE_H 1
 
-#include "../DispPrerequisites.h"
-#include <Math/Vector2.h>
+#include "../GALPrerequisites.h"
+#include "../../../GreaperMath/Public/Vector2.h"
 
-namespace greaper::disp
+namespace greaper::gal
 {
-	class Monitor;
 	class VideoMode
 	{
 		WMonitor m_Monitor;
@@ -48,4 +47,4 @@ namespace greaper::disp
 	}
 }
 
-#endif /* DISP_VIDEO_MODE_H */
+#endif /* GAL_VIDEO_MODE_H */

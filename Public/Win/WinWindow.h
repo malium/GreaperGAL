@@ -5,13 +5,13 @@
 
 #pragma once
 
-#ifndef DISP_WIN_WINDOW_H
-#define DISP_WIN_WINDOW_H 1
+#ifndef GAL_WIN_WINDOW_H
+#define GAL_WIN_WINDOW_H 1
 
 #include "../Base/IWindow.h"
-#include <Core/Win/Win32Base.h>
+#include "../../../GreaperCore/Public/Win/Win32Base.h"
 
-namespace greaper::disp
+namespace greaper::gal
 {
 	struct WinWindowDesc : public WindowDesc
 	{
@@ -23,4 +23,4 @@ namespace greaper::disp
 	};
 }
 
-#endif /* DISP_WIN_WINDOW_H */
+#endif /* GAL_WIN_WINDOW_H */

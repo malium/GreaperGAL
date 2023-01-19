@@ -5,17 +5,15 @@
 
 #pragma once
 
-#ifndef DISP_WINDOW_MANAGER_H
-#define DISP_WINDOW_MANAGER_H 1
+#ifndef GAL_WINDOW_MANAGER_H
+#define GAL_WINDOW_MANAGER_H 1
 
 #include "ImplPrerequisites.h"
-#include <Display/IWindowManager.h>
-#include <Core/IApplication.h>
-#include <Core/Concurrency.h>
+#include "../Public/IWindowManager.h"
+#include "../../GreaperCore/Public/IApplication.h"
+#include "../../GreaperCore/Public/Concurrency.h"
 
-struct GLFWmonitor;
-
-namespace greaper::disp
+namespace greaper::gal
 {
 	class WindowManager final : public IWindowManager
 	{
@@ -35,7 +33,7 @@ namespace greaper::disp
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
 		void OnNewManager(const PInterface& newInterface)noexcept;
 
-		friend void OnMonitorChange(GLFWmonitor* monitor, int32 event);
+		friend void OnMonitorChange(void* monitor, int32 event);
 
 	public:
 		WindowManager()noexcept = default;
@@ -67,4 +65,4 @@ namespace greaper::disp
 	};
 }
 
-#endif /* DISP_WINDOW_MANAGER_H */
+#endif /* GAL_WINDOW_MANAGER_H */

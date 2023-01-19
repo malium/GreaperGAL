@@ -4,19 +4,17 @@
 ***********************************************************************************/
 
 #include "WindowManager.h"
-#include "GreaperDisplayDLL.h"
-#define GLFW_DLL
-#include <External/GLFW/glfw3.h>
+#include "GreaperGALDLL.h"
 
 using namespace greaper;
-using namespace greaper::disp;
+using namespace greaper::gal;
 
 SPtr<WindowManager> gWindowManager = {};
-extern SPtr<GreaperDispLibrary> gDispLibrary;
+extern SPtr<GreaperGALLibrary> gGALLibrary;
 
-static PMonitor CreateMonitor(GLFWmonitor* monitorInfo, int32 index)
+static PMonitor CreateMonitor(void* monitorInfo, int32 index)
 {
-	const char* errorMsg = nullptr;
+	/*const char* errorMsg = nullptr;
 	float hdpi, vdpi;
 	int32 workX, workY, workW, workH;
 	int32 monX, monY;
@@ -100,11 +98,13 @@ static PMonitor CreateMonitor(GLFWmonitor* monitorInfo, int32 index)
 	RectI workRect{ math::Vector2i(workX, workY), math::Vector2i(workW, workH) };
 
 	new(monitorPtr.get())Monitor(sizeRect, workRect, index, name, std::move(videoModes), closestVideoModeIndex, (hdpi + vdpi) * 0.5f, hdpi, vdpi);
-	return monitorPtr;
+	return monitorPtr;*/
+	return PMonitor();
 }
 
-void greaper::disp::OnMonitorChange(GLFWmonitor* monitor, int32 event)
+void greaper::gal::OnMonitorChange(void* monitor, int32 event)
 {
+	/*
 	if (gWindowManager == nullptr || !gWindowManager->IsInitialized() || !gWindowManager->IsActive())
 		return;
 		
@@ -134,7 +134,7 @@ void greaper::disp::OnMonitorChange(GLFWmonitor* monitor, int32 event)
 		{
 			gDispLibrary->LogWarning("A monitor has been disconnected but the Monitor class was not found (weird).");
 		}
-	}
+	}*/
 }
 
 void WindowManager::OnInitialization() noexcept
@@ -191,14 +191,14 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	{
 		QueryMonitors();
 	}
-	glfwSetMonitorCallback(&OnMonitorChange);
+	//glfwSetMonitorCallback(&OnMonitorChange);
 }
 
 void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
 {
 	m_Monitors.clear();
-	if (newDefault == nullptr) // If there's no new WindowManager disconnect callback
-		glfwSetMonitorCallback(nullptr);
+	//if (newDefault == nullptr) // If there's no new WindowManager disconnect callback
+		//glfwSetMonitorCallback(nullptr);
 }
 
 void WindowManager::InitProperties() noexcept
@@ -216,7 +216,7 @@ void WindowManager::QueryMonitors()
 	Verify(!m_Library.expired(), "GreaperLibrary attached was expired!");
 	auto lib = m_Library.lock();
 
-	int32 monitorCount;
+	/*int32 monitorCount;
 	auto** monitors = glfwGetMonitors(&monitorCount);
 	LOCK(m_MonitorMutex);
 	m_Monitors.clear();
@@ -226,7 +226,7 @@ void WindowManager::QueryMonitors()
 	for (int32 i = 0; i < monitorCount; ++i)
 	{
 		m_Monitors.push_back(CreateMonitor(monitors[i], i));
-	}
+	}*/
 }
 
 SPtr<Monitor> WindowManager::GetMainMonitor() const
@@ -274,7 +274,7 @@ void WindowManager::PollEvents()
 		return;
 	}
 
-	glfwPollEvents();
+	//glfwPollEvents();
 }
 
 void WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const

@@ -5,16 +5,14 @@
 
 #pragma once
 
-#ifndef DISP_I_WINDOW_H
-#define DISP_I_WINDOW_H 1
+#ifndef GAL_I_WINDOW_H
+#define GAL_I_WINDOW_H 1
 
-#include "../DispPrerequisites.h"
-#include <Core/Base/Rect.h>
-#include <Core/Base/IThread.h>
-#include <Core/Enumeration.h>
-#include <Core/Event.h>
-#include <Math/Vector2.h>
-#include <Core/MPMCTaskScheduler.h>
+#include "../GALPrerequisites.h"
+#include "../../../GreaperMath/Public/Rect.h"
+#include "../../../GreaperCore/Public/Base/IThread.h"
+#include "../../../GreaperCore/Public/Event.h"
+#include "../../../GreaperCore/Public/MPMCTaskScheduler.h"
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
@@ -26,7 +24,7 @@ ENUMERATION(OpenGLProfile, Compatibility, Core);
 ENUMERATION(OpenGLContextRobustness, NoRobustness, NoResetNotification, LooseContextOnReset);
 ENUMERATION(OpenGLReleaseBehaviour, Flush, None);
 
-namespace greaper::disp
+namespace greaper::gal
 {
 	struct FramebufferDesc
 	{
@@ -161,4 +159,4 @@ namespace greaper::disp
 	};
 }
 
-#endif /* DISP_I_WINDOW_H */
+#endif /* GAL_I_WINDOW_H */

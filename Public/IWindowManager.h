@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifndef DISP_I_WINDOW_MANAGER_H
-#define DISP_I_WINDOW_MANAGER_H 1
+#ifndef GAL_I_WINDOW_MANAGER_H
+#define GAL_I_WINDOW_MANAGER_H 1
 
-#include "DispPrerequisites.h"
-#include <Core/Interface.h>
+#include "GALPrerequisites.h"
+#include "../../GreaperCore/Public/Interface.h"
 #include "Base/Monitor.h"
 #include "Base/IWindow.h"
 
-namespace greaper::disp
+namespace greaper::gal
 {
 	class IWindowManager : public TInterface<IWindowManager>
 	{
@@ -40,4 +40,4 @@ namespace greaper::disp
 	};
 }
 
-#endif /* DISP_I_WINDOW_MANAGER_H */
+#endif /* GAL_I_WINDOW_MANAGER_H */
