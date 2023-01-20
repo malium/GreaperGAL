@@ -99,8 +99,16 @@ namespace greaper::gal
 		bool m_IsVisible = false;
 		WWindowManager m_WindowManager;
 		PTaskScheduler m_TaskScheduler;
+		PWindow m_This;
 
 	public:
+		// These events are triggered only by the connected window
+		using WindowClosingEvent = Event<const PWindow&>;
+		using WindowMovedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
+		using WindowResizedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
+		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
+		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
+
 		IWindow()noexcept = default;
 		virtual ~IWindow() = default;
 
