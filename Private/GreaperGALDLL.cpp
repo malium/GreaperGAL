@@ -48,10 +48,10 @@ void* _Greaper()
 	return &gGALLibrary;
 }
 
-static void GLFWErrorReporter(int32 errorCode, const char* errorMessage)
+/*static void GLFWErrorReporter(int32 errorCode, const char* errorMessage)
 {
 	gGALLibrary->LogError(greaper::Format("GLFW error, code:%" PRIi32 " msg: %s.", errorCode, errorMessage));
-}
+}*/
 
 void greaper::gal::GreaperGALLibrary::Initialize() noexcept
 {
