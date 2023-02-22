@@ -16,7 +16,7 @@
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
-ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight);
+ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight, NoAnchor);
 ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
 
 ENUMERATION(OpenGLCreationAPI, Native, EGL, OSMESA);
@@ -35,21 +35,21 @@ namespace greaper::gal
 		int32 DepthBits = 24;
 		int32 StencilBits = 8;
 
-		int32 MSAASamples;
-		bool SRGBCapable;
-		bool DoubleBuffer;
+		int32 MSAASamples = 0;
+		bool SRGBCapable = false;
+		bool DoubleBuffer = true;
 	};
 	struct OpenGLDesc
 	{
-		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native;
-		int32 VersionMajor = -1;
-		int32 VersionMinor = -1;
+		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native; // Only in linux
+		int32 VersionMajor = -1; // Negative values selects the maximum version supported by the adapter
+		int32 VersionMinor = -1; // Negative values selects the maximum version supported by the adapter
 		OpenGLProfile_t Profile = OpenGLProfile_t::Core;
 		bool ContextDebug = GREAPER_DEBUG; // GL_KHR_debug
 		OpenGLContextRobustness_t ContextRobustness = OpenGLContextRobustness_t::NoRobustness;
 		OpenGLReleaseBehaviour_t ContextReleaseBehaviour = OpenGLReleaseBehaviour_t::Flush; // GL_KHR_context_flush_control
 		bool ContextGenerateErrors = true; // GL_KHR_no_error
-		PWindow SharedContextWindow;
+		PWindow SharedContextWindow = PWindow();
 	};
 	struct VulkanDesc
 	{
@@ -57,20 +57,21 @@ namespace greaper::gal
 	};
 	struct WindowDesc
 	{
-		WStringView Title = L"GreaperWindow"sv;
-		math::Vector2i Size = math::Vector2i(1280, 720);
-		AnchoredPosition_t Position = AnchoredPosition_t::Center;
-		RenderBackend_t Backend = RenderBackend_t::Native;
+		WStringView Title = L"Greaper Window"sv;
+		math::Vector2i Size = math::Vector2i(1280, 720); // The size of the window taking into account the window decoration (unless borderless or fullscreen)
+		AnchoredPosition_t Position = AnchoredPosition_t::Center; // Try to move the window to certain anchor position (some platforms don't care about the initial position set)
+		RenderBackend_t Backend = RenderBackend_t::Native; // Native will create a default Window using the native OS interface, OpenGL and Vulkan needs special initialization during window creation
 		WindowMode_t Mode = WindowMode_t::Windowed;
 		WindowState_t State = WindowState_t::Normal;
-		bool ResizingEnabled = true;
-		bool StartVisible = true;
-		bool StartFocused = true;
+		bool ResizingEnabled = true; // Allow to resize the window by the user
+		bool StartVisible = true; // Window should start visible (active on Windows), meaning that if its not active, window is running but not visible on the user desktop
+		bool StartFocused = true; // Window should start on top and with keyboard and mouse focus
 		int32 MonitorIndex = 0; // On what monitor should the window appear, <=0 selects the primary monitor
 		PTaskScheduler Scheduler = PTaskScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
 		math::Vector2i ResizingAspectRatio = math::Vector2i(0, 0); // What ratio aspec ratio scaling is allowed, (<=0,<=0) will not lock scaling
 		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
+		PWindow ParentWindow = PWindow();
 		StringView X11ClassName = ""sv;
 		StringView X11InstanceName = ""sv;
 		FramebufferDesc Framebuffer = FramebufferDesc();
