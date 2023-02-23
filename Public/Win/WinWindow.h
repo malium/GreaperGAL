@@ -15,7 +15,7 @@ namespace greaper::gal
 {
 	struct WinWindowDesc : public WindowDesc
 	{
-
+		
 	};
 	class WinWindow : public IWindow
 	{

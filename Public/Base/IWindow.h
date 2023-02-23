@@ -19,11 +19,6 @@ ENUMERATION(WindowState, Normal, Minimized, Maximized);
 ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight, NoAnchor);
 ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
 
-ENUMERATION(OpenGLCreationAPI, Native, EGL, OSMESA);
-ENUMERATION(OpenGLProfile, Compatibility, Core);
-ENUMERATION(OpenGLContextRobustness, NoRobustness, NoResetNotification, LooseContextOnReset);
-ENUMERATION(OpenGLReleaseBehaviour, Flush, None);
-
 namespace greaper::gal
 {
 	struct FramebufferDesc
@@ -38,22 +33,6 @@ namespace greaper::gal
 		int32 MSAASamples = 0;
 		bool SRGBCapable = false;
 		bool DoubleBuffer = true;
-	};
-	struct OpenGLDesc
-	{
-		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native; // Only in linux
-		int32 VersionMajor = -1; // Negative values selects the maximum version supported by the adapter
-		int32 VersionMinor = -1; // Negative values selects the maximum version supported by the adapter
-		OpenGLProfile_t Profile = OpenGLProfile_t::Core;
-		bool ContextDebug = GREAPER_DEBUG; // GL_KHR_debug
-		OpenGLContextRobustness_t ContextRobustness = OpenGLContextRobustness_t::NoRobustness;
-		OpenGLReleaseBehaviour_t ContextReleaseBehaviour = OpenGLReleaseBehaviour_t::Flush; // GL_KHR_context_flush_control
-		bool ContextGenerateErrors = true; // GL_KHR_no_error
-		PWindow SharedContextWindow = PWindow();
-	};
-	struct VulkanDesc
-	{
-
 	};
 	struct WindowDesc
 	{
@@ -72,11 +51,7 @@ namespace greaper::gal
 		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		PWindow ParentWindow = PWindow();
-		StringView X11ClassName = ""sv;
-		StringView X11InstanceName = ""sv;
 		FramebufferDesc Framebuffer = FramebufferDesc();
-		OpenGLDesc OpenGL = OpenGLDesc();
-		VulkanDesc Vulkan = VulkanDesc();
 
 		constexpr WindowDesc()noexcept = default;
 	};

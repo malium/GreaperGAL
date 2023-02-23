@@ -5,16 +5,17 @@
 
 #pragma once
 
-#ifndef GAL_WIN_GL_WINDOW_H
-#define GAL_WIN_GL_WINDOW_H 1
+#ifndef GAL_GL_WL_WINDOW_H
+#define GAL_GL_WL_WINDOW_H 1
 
-#include "WinWindow.h"
-#include "WGL.h"
+#include "WLWindow.h"
+#include "GLX.h"
 
 namespace greaper::gal
 {
-	struct WinGLWindowDesc : public WinWindowDesc
+	struct GLWLWindowDesc : public WLWindowDesc
 	{
+		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native;
 		int32 VersionMajor = -1; // Negative values selects the maximum version supported by the adapter
 		int32 VersionMinor = -1; // Negative values selects the maximum version supported by the adapter
 		OpenGLProfile_t Profile = OpenGLProfile_t::Core;
@@ -24,11 +25,10 @@ namespace greaper::gal
 		bool ContextGenerateErrors = true; // GL_KHR_no_error
 		PWindow SharedContextWindow = PWindow();
 	};
-	
-	class WinGLWindow : public WinWindow
+	class GLWLWindow : public WLWindow
 	{
 		
 	};
 }
 
-#endif /* GAL_WIN_GL_WINDOW_H */
+#endif /* GAL_GL_WL_WINDOW_H */

@@ -3,9 +3,24 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#include "../OpenGL/GL.h"
+#pragma once
 
-/* This is a modification of wglext.h from Khronos OpenGL / OpenGL ES XML API Registry
-** Copyright 2013-2020 The Khronos Group Inc.
-** SPDX-License-Identifier: MIT
- */
+#ifndef GAL_X11_WINDOW_H
+#define GAL_X11_WINDOW_H 1
+
+#include "../Base/IWindow.h"
+
+namespace greaper::gal
+{
+	struct X11WindowDesc : public WindowDesc
+	{
+		StringView X11ClassName = ""sv;
+		StringView X11InstanceName = ""sv;
+	};
+	class X11Window : public IWindow
+	{
+		
+	};
+}
+
+#endif /* GAL_X11_WINDOW_H */
