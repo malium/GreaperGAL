@@ -1,29 +1,22 @@
+#!/usr/bin/env python
+
+####################################################################################
+#   Copyright 2023 Marcos Sánchez Torrent.                                         #
+#   All Rights Reserved.                                                           #
+####################################################################################
+
 import argparse
+import datetime
 import os
 import sys
 import re
 import urllib.request
 
-#def write(f, s):
-#    f.write(s.encode('utf-8'))
-
-#def touch_dir(path):
-#    if not os.path.exists(path):
-#        os.makedirs(path)
-
-def download(url, dst):
-    if os.path.exists(dst):
-        print('Reusing {0}...'.format(dst))
-        return
-
-    print('Downloading {0}...'.format(dst))
-    web = urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'}))
-    with open(dst, 'wb') as f:
-        f.writelines(web.readlines())
-
 generate_gl = True
 generate_glx = True
 generate_wgl = True
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 urls = {
     'gl' : 'https://www.khronos.org/registry/OpenGL/api/GL/glcorearb.h',
@@ -129,6 +122,52 @@ typedict= {
     }
 }
 
+license_Marcos = '''/***********************************************************************************
+*   Copyright %d Marcos Sánchez Torrent.                                         *
+*   All Rights Reserved.                                                           *
+***********************************************************************************/
+''' % (datetime.date.today().year)
+
+license_khronos = '''/*
+** Copyright 2013-2020 The Khronos Group Inc.
+** SPDX-License-Identifier: MIT
+** 
+** This file is a modification from the generated XML API registry.
+** The current version of the Registry, generator scripts
+** used to make the header, and the header can be found at
+**   https://github.com/KhronosGroup/OpenGL-Registry
+*/
+'''
+
+include_guards_begin = {
+    'gl' : '#ifndef GAL_GL_HEADER_H\n#define GAL_GL_HEADER_H 1\n',
+    'glx' : '#ifndef GAL_GLX_HEADER_H\n#define GAL_GLX_HEADER_H 1\n',
+    'wgl' : '#ifndef GAL_WGL_HEADER_H\n#define GAL_WGL_HEADER_H 1\n'
+}
+
+include_guards_end = {
+    'gl' : '#endif /* GAL_GL_HEADER_H */\n',
+    'glx' : '#endif /* GAL_GLX_HEADER_H */\n',
+    'wgl' : '#endif /* GAL_WGL_HEADER_H */\n'
+}
+
+proc_pattern = {
+    'gl' : re.compile(r'GLAPI(.*)APIENTRY (\w+) (\(.*\)).*'),
+    'glx' : re.compile(r'(.*)(glX\w+) (\(.*\)).*'),
+    'wgl' : re.compile(r'(.*)WINAPI (\w+) (\(.*\)).*')
+}
+
+def proc_to_using(proc, header)->str:
+    pm = proc_pattern[header].match(proc)
+    ret = pm.group(1).strip()
+    name = pm.group(2).strip()
+    args = pm.group(3).strip()
+    return 'using ' + name + '_t = ' + ret + '(*)' + args + ';'
+
+def proc_to_function(proc, header)->str:
+    pm = proc_pattern[header].match(proc)
+    name = pm.group(2).strip()
+    return 'FuncDef::' + name + '_t ' + name + ';'
 
 def parse_header(header:str):
     url = urls[header]
@@ -191,7 +230,6 @@ def parse_header(header:str):
             if m is not None:
                 multiline_struct = str(line)
                 continue
-            print(str(line).strip(' \r\n'))
         else: # multiline struct definition
             m = struct_typedef_multiline_end.match(line)
             multiline_struct += str(line)
@@ -200,12 +238,63 @@ def parse_header(header:str):
                 multiline_struct = ''
                 continue
 
+def write_typedefs(file, header):
+    types = typedict[header]
+    for typeInfo in types:
+        file.write(('\ttypedef %s %s;\n'%(types[typeInfo], typeInfo)).encode('utf-8'))
+    file.write(('using %s_proc = void(*)();\n'%(header.upper())).encode('utf-8'))
+    file.write(b'\n')
+
+def write_function_definitions(file, header):
+    functions = procs[header]
+    for proc in functions:
+        file.write(('\t\t%s\n'%(proc_to_using(proc, header))).encode('utf-8'))
+
+def write_functions(file, header):
+    functions = procs[header]
+    for proc in functions:
+        file.write(('\t\t%s\n'%(proc_to_function(proc, header))).encode('utf-8'))
+
+def write_proc_array(file, header):
+    functions = procs[header]
+
+
+def generate_header(header:str):
+    filename = "GAL" + header.upper() + ".h"
+    if os.path.exists(filename):
+        os.remove(filename)
+    with open(filename, "wb") as file:
+        license_header = license_Marcos + '\n' + license_khronos + '\n'
+        file.write(license_header.encode('utf-8'))
+        file.write((include_guards_begin[header] + '\n').encode('utf-8'))
+
+        # union begin
+        file.write(("union " + header.upper() + "\n{\n").encode('utf-8'))
+
+        write_typedefs(file, header)
+
+        file.write('\tstruct FuncDef {\n'.encode('utf-8'))
+        write_function_definitions(file, header)
+        file.write('\t};\n'.encode('utf-8'))
+        file.write('\tstruct {\n'.encode('utf-8'))
+        write_functions(file, header)
+        file.write('\t};\n'.encode('utf-8'))
+        # union end
+        file.write("};\n".encode('utf-8'))
+
+        
+        file.write(include_guards_end[header].encode('utf-8'))
+
+    return
 
 if generate_gl:
     parse_header('gl')
+    generate_header('gl')
 if generate_glx:
     parse_header('glx')
+    generate_header('glx')
 if generate_wgl:
     parse_header('wgl')
+    generate_header('wgl')
             
 print('end')
