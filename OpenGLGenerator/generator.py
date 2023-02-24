@@ -15,6 +15,7 @@ import urllib.request
 generate_gl = True
 generate_glx = True
 generate_wgl = True
+remove_gl_prefix = True
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,7 +82,6 @@ struct_typedef = re.compile(r'typedef struct.*;')
 struct_define = re.compile(r'struct \w+;')
 struct_typedef_multiline_begin = re.compile(r'typedef struct \{')
 struct_typedef_multiline_end = re.compile(r'\} \w+;')
-
 
 typedict= {
     'gl' : {
@@ -151,23 +151,39 @@ include_guards_end = {
     'wgl' : '#endif /* GAL_WGL_HEADER_H */\n'
 }
 
-proc_pattern = {
+proc_header_pattern = {
     'gl' : re.compile(r'GLAPI(.*)APIENTRY (\w+) (\(.*\)).*'),
     'glx' : re.compile(r'(.*)(glX\w+) (\(.*\)).*'),
     'wgl' : re.compile(r'(.*)WINAPI (\w+) (\(.*\)).*')
 }
 
+constant_pattern = re.compile(r'#\w+\W+(\w+)\W+(.*)')
+
 def proc_to_using(proc, header)->str:
-    pm = proc_pattern[header].match(proc)
+    pm = proc_header_pattern[header].match(proc)
     ret = pm.group(1).strip()
     name = pm.group(2).strip()
     args = pm.group(3).strip()
     return 'using ' + name + '_t = ' + ret + '(*)' + args + ';'
 
 def proc_to_function(proc, header)->str:
-    pm = proc_pattern[header].match(proc)
-    name = pm.group(2).strip()
-    return 'FuncDef::' + name + '_t ' + name + ';'
+    pm = proc_header_pattern[header].match(proc)
+    defname = name = pm.group(2).strip()
+    if remove_gl_prefix:
+        name = name.lstrip(header)
+    return 'FuncDef::' + defname + '_t ' + name + ';'
+
+def proc_to_name(proc, header)->str:
+    pm = proc_header_pattern[header].match(proc)
+    return pm.group(2).strip()
+
+def define_to_constant(define, header)->str:
+    dm = constant_pattern.match(define)
+    name = dm.group(1)
+    if remove_gl_prefix:
+        name = name.lstrip(header.upper() + '_')
+    value = dm.group(2)
+    return 'static constexpr auto %s = %s;'%(name, value)
 
 def parse_header(header:str):
     url = urls[header]
@@ -242,8 +258,7 @@ def write_typedefs(file, header):
     types = typedict[header]
     for typeInfo in types:
         file.write(('\ttypedef %s %s;\n'%(types[typeInfo], typeInfo)).encode('utf-8'))
-    file.write(('using %s_proc = void(*)();\n'%(header.upper())).encode('utf-8'))
-    file.write(b'\n')
+    file.write(('\tusing %sproc = void(*)();\n'%(header.upper())).encode('utf-8'))
 
 def write_function_definitions(file, header):
     functions = procs[header]
@@ -255,8 +270,62 @@ def write_functions(file, header):
     for proc in functions:
         file.write(('\t\t%s\n'%(proc_to_function(proc, header))).encode('utf-8'))
 
-def write_proc_array(file, header):
+def write_constants(file, header):
+    constants = defines[header]
+    for constant in constants:
+        file.write(('\t%s\n'%(define_to_constant(constant, header))).encode('utf-8'))
+
+def write_proclist(file, header):
     functions = procs[header]
+    file.write(('\t%sproc ProcList[%d];\n'%(header.upper(), len(functions))).encode('utf-8'))
+
+def write_funcdef(file, header):
+    file.write('\tstruct FuncDef {\n'.encode('utf-8'))
+    write_function_definitions(file, header)
+    file.write('\t};\n'.encode('utf-8'))
+
+def write_function_struct(file, header):
+    file.write('\tstruct {\n'.encode('utf-8'))
+    write_functions(file, header)
+    file.write('\t};\n'.encode('utf-8'))
+
+def write_procnamelist(file, header):
+    functions = procs[header]
+    file.write(('\tstatic constexpr const char* ProcList[%d] = {\n'%(len(functions))).encode('utf-8'))
+    for proc in functions:
+        file.write(('\t\t"%s",\n'%(proc_to_name(proc, header))).encode('utf-8'))
+    file.write(('\t};\n').encode('utf-8'))
+
+def write_union(file, header):
+    # union begin
+    file.write(("union " + header.upper() + "\n{\n").encode('utf-8'))
+
+    write_typedefs(file, header)
+
+    file.write(b'\n')
+
+    write_constants(file, header)
+
+    file.write(b'\n')
+
+    write_funcdef(file, header)
+
+    file.write(b'\n')
+
+    write_function_struct(file, header)
+
+    file.write(b'\n')
+    
+    write_proclist(file, header)
+
+    file.write(b'\n')
+
+    write_procnamelist(file, header)
+
+    file.write(b'\n')
+
+    # union end
+    file.write("};\n".encode('utf-8'))
 
 
 def generate_header(header:str):
@@ -268,20 +337,7 @@ def generate_header(header:str):
         file.write(license_header.encode('utf-8'))
         file.write((include_guards_begin[header] + '\n').encode('utf-8'))
 
-        # union begin
-        file.write(("union " + header.upper() + "\n{\n").encode('utf-8'))
-
-        write_typedefs(file, header)
-
-        file.write('\tstruct FuncDef {\n'.encode('utf-8'))
-        write_function_definitions(file, header)
-        file.write('\t};\n'.encode('utf-8'))
-        file.write('\tstruct {\n'.encode('utf-8'))
-        write_functions(file, header)
-        file.write('\t};\n'.encode('utf-8'))
-        # union end
-        file.write("};\n".encode('utf-8'))
-
+        write_union(file, header)
         
         file.write(include_guards_end[header].encode('utf-8'))
 
