@@ -9,7 +9,7 @@
 #define GAL_GL_X11_WINDOW_H 1
 
 #include "X11Window.h"
-#include "GLX.h"
+#include "../OpenGL/GALGLX.h"
 
 namespace greaper::gal
 {

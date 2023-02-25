@@ -248,8 +248,11 @@
     <ClInclude Include="Public\Base\VideoMode.h" />
     <ClInclude Include="Public\GALPrerequisites.h" />
     <ClInclude Include="Public\IWindowManager.h" />
+    <ClInclude Include="Public\OpenGL\GALGL.h" />
+    <ClInclude Include="Public\OpenGL\GALWGL.h" />
+    <ClInclude Include="Public\OpenGL\GLDefines.h" />
     <ClInclude Include="Public\Win\GLWinWindow.h" />
-    <ClInclude Include="Public\Win\WGL.h" />
+    <ClInclude Include="Public\Win\VkWinWindow.h" />
     <ClInclude Include="Public\Win\WinWindow.h" />
   </ItemGroup>
   <ItemGroup>

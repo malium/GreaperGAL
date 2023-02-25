@@ -9,7 +9,9 @@
 #define GAL_WIN_GL_WINDOW_H 1
 
 #include "WinWindow.h"
-#include "WGL.h"
+#include "../../../GreaperCore/Public/Win/Win32GDI.h"
+#include "../OpenGL/GALWGL.h"
+#include "../OpenGL/GLDefines.h"
 
 namespace greaper::gal
 {
@@ -27,7 +29,7 @@ namespace greaper::gal
 	
 	class WinGLWindow : public WinWindow
 	{
-		
+
 	};
 }
 

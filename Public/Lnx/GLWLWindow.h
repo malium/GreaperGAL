@@ -9,7 +9,7 @@
 #define GAL_GL_WL_WINDOW_H 1
 
 #include "WLWindow.h"
-#include "GLX.h"
+#include "../OpenGL/GALGLX.h"
 
 namespace greaper::gal
 {
