@@ -248,7 +248,14 @@
     <ClInclude Include="Public\Base\VideoMode.h" />
     <ClInclude Include="Public\GALPrerequisites.h" />
     <ClInclude Include="Public\IWindowManager.h" />
+    <ClInclude Include="Public\Lnx\GLWLWindow.h" />
+    <ClInclude Include="Public\Lnx\GLX11Window.h" />
+    <ClInclude Include="Public\Lnx\VkWLWindow.h" />
+    <ClInclude Include="Public\Lnx\VkX11Window.h" />
+    <ClInclude Include="Public\Lnx\WLWindow.h" />
+    <ClInclude Include="Public\Lnx\X11Window.h" />
     <ClInclude Include="Public\OpenGL\GALGL.h" />
+    <ClInclude Include="Public\OpenGL\GALGLX.h" />
     <ClInclude Include="Public\OpenGL\GALWGL.h" />
     <ClInclude Include="Public\OpenGL\GLDefines.h" />
     <ClInclude Include="Public\Win\GLWinWindow.h" />
