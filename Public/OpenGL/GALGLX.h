@@ -78,7 +78,7 @@ union GLX
 	static constexpr auto STENCIL_BUFFER_BIT = 0x00000040;
 	static constexpr auto ACCUM_BUFFER_BIT = 0x00000080;
 	static constexpr auto CONFIG_CAVEAT = 0x20;
-	static constexpr auto VISUAL_TYPE = 0x22;
+	static constexpr auto X_VISUAL_TYPE = 0x22;
 	static constexpr auto TRANSPARENT_TYPE = 0x23;
 	static constexpr auto TRANSPARENT_INDEX_VALUE = 0x24;
 	static constexpr auto TRANSPARENT_RED_VALUE = 0x25;
@@ -92,7 +92,7 @@ union GLX
 	static constexpr auto DIRECT_COLOR = 0x8003;
 	static constexpr auto PSEUDO_COLOR = 0x8004;
 	static constexpr auto STATIC_COLOR = 0x8005;
-	static constexpr auto RAY_SCALE = 0x8006;
+	static constexpr auto GRAY_SCALE = 0x8006;
 	static constexpr auto STATIC_GRAY = 0x8007;
 	static constexpr auto TRANSPARENT_RGB = 0x8008;
 	static constexpr auto TRANSPARENT_INDEX = 0x8009;
@@ -101,7 +101,7 @@ union GLX
 	static constexpr auto NON_CONFORMANT_CONFIG = 0x800D;
 	static constexpr auto DRAWABLE_TYPE = 0x8010;
 	static constexpr auto RENDER_TYPE = 0x8011;
-	static constexpr auto RENDERABLE = 0x8012;
+	static constexpr auto X_RENDERABLE = 0x8012;
 	static constexpr auto FBCONFIG_ID = 0x8013;
 	static constexpr auto RGBA_TYPE = 0x8014;
 	static constexpr auto COLOR_INDEX_TYPE = 0x8015;
@@ -109,7 +109,7 @@ union GLX
 	static constexpr auto MAX_PBUFFER_HEIGHT = 0x8017;
 	static constexpr auto MAX_PBUFFER_PIXELS = 0x8018;
 	static constexpr auto PRESERVED_CONTENTS = 0x801B;
-	static constexpr auto ARGEST_PBUFFER = 0x801C;
+	static constexpr auto LARGEST_PBUFFER = 0x801C;
 	static constexpr auto WIDTH = 0x801D;
 	static constexpr auto HEIGHT = 0x801E;
 	static constexpr auto EVENT_MASK = 0x801F;
@@ -134,7 +134,7 @@ union GLX
 	static constexpr auto CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB = 0x00000002;
 	static constexpr auto CONTEXT_PROFILE_MASK_ARB = 0x9126;
 	static constexpr auto CONTEXT_ROBUST_ACCESS_BIT_ARB = 0x00000004;
-	static constexpr auto OSE_CONTEXT_ON_RESET_ARB = 0x8252;
+	static constexpr auto LOSE_CONTEXT_ON_RESET_ARB = 0x8252;
 	static constexpr auto CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB = 0x8256;
 	static constexpr auto NO_RESET_NOTIFICATION_ARB = 0x8261;
 	static constexpr auto RGBA_FLOAT_TYPE_ARB = 0x20B9;
@@ -146,16 +146,16 @@ union GLX
 	static constexpr auto CONTEXT_ALLOW_BUFFER_BYTE_ORDER_MISMATCH_ARB = 0x2095;
 	static constexpr auto SAMPLE_BUFFERS_3DFX = 0x8050;
 	static constexpr auto SAMPLES_3DFX = 0x8051;
-	static constexpr auto PU_VENDOR_AMD = 0x1F00;
-	static constexpr auto PU_RENDERER_STRING_AMD = 0x1F01;
-	static constexpr auto PU_OPENGL_VERSION_STRING_AMD = 0x1F02;
-	static constexpr auto PU_FASTEST_TARGET_GPUS_AMD = 0x21A2;
-	static constexpr auto PU_RAM_AMD = 0x21A3;
-	static constexpr auto PU_CLOCK_AMD = 0x21A4;
-	static constexpr auto PU_NUM_PIPES_AMD = 0x21A5;
-	static constexpr auto PU_NUM_SIMD_AMD = 0x21A6;
-	static constexpr auto PU_NUM_RB_AMD = 0x21A7;
-	static constexpr auto PU_NUM_SPI_AMD = 0x21A8;
+	static constexpr auto GPU_VENDOR_AMD = 0x1F00;
+	static constexpr auto GPU_RENDERER_STRING_AMD = 0x1F01;
+	static constexpr auto GPU_OPENGL_VERSION_STRING_AMD = 0x1F02;
+	static constexpr auto GPU_FASTEST_TARGET_GPUS_AMD = 0x21A2;
+	static constexpr auto GPU_RAM_AMD = 0x21A3;
+	static constexpr auto GPU_CLOCK_AMD = 0x21A4;
+	static constexpr auto GPU_NUM_PIPES_AMD = 0x21A5;
+	static constexpr auto GPU_NUM_SIMD_AMD = 0x21A6;
+	static constexpr auto GPU_NUM_RB_AMD = 0x21A7;
+	static constexpr auto GPU_NUM_SPI_AMD = 0x21A8;
 	static constexpr auto BACK_BUFFER_AGE_EXT = 0x20F4;
 	static constexpr auto CONTEXT_PRIORITY_LEVEL_EXT = 0x3100;
 	static constexpr auto CONTEXT_PRIORITY_HIGH_EXT = 0x3101;
@@ -175,7 +175,7 @@ union GLX
 	static constexpr auto STEREO_NOTIFY_EXT = 0x00000000;
 	static constexpr auto SWAP_INTERVAL_EXT = 0x20F1;
 	static constexpr auto MAX_SWAP_INTERVAL_EXT = 0x20F2;
-	static constexpr auto ATE_SWAPS_TEAR_EXT = 0x20F3;
+	static constexpr auto LATE_SWAPS_TEAR_EXT = 0x20F3;
 	static constexpr auto TEXTURE_1D_BIT_EXT = 0x00000001;
 	static constexpr auto TEXTURE_2D_BIT_EXT = 0x00000002;
 	static constexpr auto TEXTURE_RECTANGLE_BIT_EXT = 0x00000004;
@@ -209,7 +209,7 @@ union GLX
 	static constexpr auto AUX7_EXT = 0x20E9;
 	static constexpr auto AUX8_EXT = 0x20EA;
 	static constexpr auto AUX9_EXT = 0x20EB;
-	static constexpr auto VISUAL_TYPE_EXT = 0x22;
+	static constexpr auto X_VISUAL_TYPE_EXT = 0x22;
 	static constexpr auto TRANSPARENT_TYPE_EXT = 0x23;
 	static constexpr auto TRANSPARENT_INDEX_VALUE_EXT = 0x24;
 	static constexpr auto TRANSPARENT_RED_VALUE_EXT = 0x25;
@@ -221,7 +221,7 @@ union GLX
 	static constexpr auto DIRECT_COLOR_EXT = 0x8003;
 	static constexpr auto PSEUDO_COLOR_EXT = 0x8004;
 	static constexpr auto STATIC_COLOR_EXT = 0x8005;
-	static constexpr auto RAY_SCALE_EXT = 0x8006;
+	static constexpr auto GRAY_SCALE_EXT = 0x8006;
 	static constexpr auto STATIC_GRAY_EXT = 0x8007;
 	static constexpr auto TRANSPARENT_RGB_EXT = 0x8008;
 	static constexpr auto TRANSPARENT_INDEX_EXT = 0x8009;
@@ -254,7 +254,7 @@ union GLX
 	static constexpr auto COVERAGE_SAMPLES_NV = 100001;
 	static constexpr auto COLOR_SAMPLES_NV = 0x20B3;
 	static constexpr auto NUM_VIDEO_SLOTS_NV = 0x20F0;
-	static constexpr auto ENERATE_RESET_ON_VIDEO_MEMORY_PURGE_NV = 0x20F7;
+	static constexpr auto GENERATE_RESET_ON_VIDEO_MEMORY_PURGE_NV = 0x20F7;
 	static constexpr auto DEVICE_ID_NV = 0x20CD;
 	static constexpr auto UNIQUE_ID_NV = 0x20CE;
 	static constexpr auto NUM_VIDEO_CAPTURE_SLOTS_NV = 0x20CF;
@@ -284,7 +284,7 @@ union GLX
 	static constexpr auto COLOR_INDEX_BIT_SGIX = 0x00000002;
 	static constexpr auto DRAWABLE_TYPE_SGIX = 0x8010;
 	static constexpr auto RENDER_TYPE_SGIX = 0x8011;
-	static constexpr auto RENDERABLE_SGIX = 0x8012;
+	static constexpr auto X_RENDERABLE_SGIX = 0x8012;
 	static constexpr auto FBCONFIG_ID_SGIX = 0x8013;
 	static constexpr auto RGBA_TYPE_SGIX = 0x8014;
 	static constexpr auto COLOR_INDEX_TYPE_SGIX = 0x8015;
@@ -315,7 +315,7 @@ union GLX
 	static constexpr auto OPTIMAL_PBUFFER_WIDTH_SGIX = 0x8019;
 	static constexpr auto OPTIMAL_PBUFFER_HEIGHT_SGIX = 0x801A;
 	static constexpr auto PRESERVED_CONTENTS_SGIX = 0x801B;
-	static constexpr auto ARGEST_PBUFFER_SGIX = 0x801C;
+	static constexpr auto LARGEST_PBUFFER_SGIX = 0x801C;
 	static constexpr auto WIDTH_SGIX = 0x801D;
 	static constexpr auto HEIGHT_SGIX = 0x801E;
 	static constexpr auto EVENT_MASK_SGIX = 0x801F;

@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 #ifdef _WIN32
-#define GALGLPROC WINAPI
+#define GALGLPROC __stdcall
 #else
 #define GALGLPROC
 #endif
@@ -66,20 +66,20 @@ union GL
 	static constexpr auto GL_FALSE = 0;
 	static constexpr auto GL_TRUE = 1;
 	static constexpr auto POINTS = 0x0000;
-	static constexpr auto INES = 0x0001;
-	static constexpr auto INE_LOOP = 0x0002;
-	static constexpr auto INE_STRIP = 0x0003;
+	static constexpr auto LINES = 0x0001;
+	static constexpr auto LINE_LOOP = 0x0002;
+	static constexpr auto LINE_STRIP = 0x0003;
 	static constexpr auto TRIANGLES = 0x0004;
 	static constexpr auto TRIANGLE_STRIP = 0x0005;
 	static constexpr auto TRIANGLE_FAN = 0x0006;
 	static constexpr auto QUADS = 0x0007;
 	static constexpr auto NEVER = 0x0200;
-	static constexpr auto ESS = 0x0201;
+	static constexpr auto LESS = 0x0201;
 	static constexpr auto EQUAL = 0x0202;
-	static constexpr auto EQUAL = 0x0203;
-	static constexpr auto REATER = 0x0204;
+	static constexpr auto LEQUAL = 0x0203;
+	static constexpr auto GREATER = 0x0204;
 	static constexpr auto NOTEQUAL = 0x0205;
-	static constexpr auto EQUAL = 0x0206;
+	static constexpr auto GEQUAL = 0x0206;
 	static constexpr auto ALWAYS = 0x0207;
 	static constexpr auto ZERO = 0;
 	static constexpr auto ONE = 1;
@@ -99,7 +99,7 @@ union GL
 	static constexpr auto BACK_RIGHT = 0x0403;
 	static constexpr auto FRONT = 0x0404;
 	static constexpr auto BACK = 0x0405;
-	static constexpr auto EFT = 0x0406;
+	static constexpr auto LEFT = 0x0406;
 	static constexpr auto RIGHT = 0x0407;
 	static constexpr auto FRONT_AND_BACK = 0x0408;
 	static constexpr auto NO_ERROR = 0;
@@ -112,10 +112,10 @@ union GL
 	static constexpr auto POINT_SIZE = 0x0B11;
 	static constexpr auto POINT_SIZE_RANGE = 0x0B12;
 	static constexpr auto POINT_SIZE_GRANULARITY = 0x0B13;
-	static constexpr auto INE_SMOOTH = 0x0B20;
-	static constexpr auto INE_WIDTH = 0x0B21;
-	static constexpr auto INE_WIDTH_RANGE = 0x0B22;
-	static constexpr auto INE_WIDTH_GRANULARITY = 0x0B23;
+	static constexpr auto LINE_SMOOTH = 0x0B20;
+	static constexpr auto LINE_WIDTH = 0x0B21;
+	static constexpr auto LINE_WIDTH_RANGE = 0x0B22;
+	static constexpr auto LINE_WIDTH_GRANULARITY = 0x0B23;
 	static constexpr auto POLYGON_MODE = 0x0B40;
 	static constexpr auto POLYGON_SMOOTH = 0x0B41;
 	static constexpr auto CULL_FACE = 0x0B44;
@@ -140,7 +140,7 @@ union GL
 	static constexpr auto BLEND_DST = 0x0BE0;
 	static constexpr auto BLEND_SRC = 0x0BE1;
 	static constexpr auto BLEND = 0x0BE2;
-	static constexpr auto OGIC_OP_MODE = 0x0BF0;
+	static constexpr auto LOGIC_OP_MODE = 0x0BF0;
 	static constexpr auto DRAW_BUFFER = 0x0C01;
 	static constexpr auto READ_BUFFER = 0x0C02;
 	static constexpr auto SCISSOR_BOX = 0x0C10;
@@ -149,7 +149,7 @@ union GL
 	static constexpr auto COLOR_WRITEMASK = 0x0C23;
 	static constexpr auto DOUBLEBUFFER = 0x0C32;
 	static constexpr auto STEREO = 0x0C33;
-	static constexpr auto INE_SMOOTH_HINT = 0x0C52;
+	static constexpr auto LINE_SMOOTH_HINT = 0x0C52;
 	static constexpr auto POLYGON_SMOOTH_HINT = 0x0C53;
 	static constexpr auto UNPACK_SWAP_BYTES = 0x0CF0;
 	static constexpr auto UNPACK_LSB_FIRST = 0x0CF1;
@@ -206,13 +206,13 @@ union GL
 	static constexpr auto STENCIL_INDEX = 0x1901;
 	static constexpr auto DEPTH_COMPONENT = 0x1902;
 	static constexpr auto RED = 0x1903;
-	static constexpr auto REEN = 0x1904;
+	static constexpr auto GREEN = 0x1904;
 	static constexpr auto BLUE = 0x1905;
 	static constexpr auto ALPHA = 0x1906;
 	static constexpr auto RGB = 0x1907;
 	static constexpr auto RGBA = 0x1908;
 	static constexpr auto POINT = 0x1B00;
-	static constexpr auto INE = 0x1B01;
+	static constexpr auto LINE = 0x1B01;
 	static constexpr auto FILL = 0x1B02;
 	static constexpr auto KEEP = 0x1E00;
 	static constexpr auto REPLACE = 0x1E01;
@@ -223,11 +223,11 @@ union GL
 	static constexpr auto VERSION = 0x1F02;
 	static constexpr auto EXTENSIONS = 0x1F03;
 	static constexpr auto NEAREST = 0x2600;
-	static constexpr auto INEAR = 0x2601;
+	static constexpr auto LINEAR = 0x2601;
 	static constexpr auto NEAREST_MIPMAP_NEAREST = 0x2700;
-	static constexpr auto INEAR_MIPMAP_NEAREST = 0x2701;
+	static constexpr auto LINEAR_MIPMAP_NEAREST = 0x2701;
 	static constexpr auto NEAREST_MIPMAP_LINEAR = 0x2702;
-	static constexpr auto INEAR_MIPMAP_LINEAR = 0x2703;
+	static constexpr auto LINEAR_MIPMAP_LINEAR = 0x2703;
 	static constexpr auto TEXTURE_MAG_FILTER = 0x2800;
 	static constexpr auto TEXTURE_MIN_FILTER = 0x2801;
 	static constexpr auto TEXTURE_WRAP_S = 0x2802;
@@ -476,7 +476,7 @@ union GL
 	static constexpr auto SAMPLER_2D_SHADOW = 0x8B62;
 	static constexpr auto DELETE_STATUS = 0x8B80;
 	static constexpr auto COMPILE_STATUS = 0x8B81;
-	static constexpr auto INK_STATUS = 0x8B82;
+	static constexpr auto LINK_STATUS = 0x8B82;
 	static constexpr auto VALIDATE_STATUS = 0x8B83;
 	static constexpr auto INFO_LOG_LENGTH = 0x8B84;
 	static constexpr auto ATTACHED_SHADERS = 0x8B85;
@@ -489,7 +489,7 @@ union GL
 	static constexpr auto SHADING_LANGUAGE_VERSION = 0x8B8C;
 	static constexpr auto CURRENT_PROGRAM = 0x8B8D;
 	static constexpr auto POINT_SPRITE_COORD_ORIGIN = 0x8CA0;
-	static constexpr auto OWER_LEFT = 0x8CA1;
+	static constexpr auto LOWER_LEFT = 0x8CA1;
 	static constexpr auto UPPER_LEFT = 0x8CA2;
 	static constexpr auto STENCIL_BACK_REF = 0x8CA3;
 	static constexpr auto STENCIL_BACK_VALUE_MASK = 0x8CA4;
@@ -577,7 +577,7 @@ union GL
 	static constexpr auto RGBA8I = 0x8D8E;
 	static constexpr auto RGB8I = 0x8D8F;
 	static constexpr auto RED_INTEGER = 0x8D94;
-	static constexpr auto REEN_INTEGER = 0x8D95;
+	static constexpr auto GREEN_INTEGER = 0x8D95;
 	static constexpr auto BLUE_INTEGER = 0x8D96;
 	static constexpr auto RGB_INTEGER = 0x8D98;
 	static constexpr auto RGBA_INTEGER = 0x8D99;
@@ -804,18 +804,18 @@ union GL
 	static constexpr auto INVALID_INDEX = 0xFFFFFFFFu;
 	static constexpr auto CONTEXT_CORE_PROFILE_BIT = 0x00000001;
 	static constexpr auto CONTEXT_COMPATIBILITY_PROFILE_BIT = 0x00000002;
-	static constexpr auto INES_ADJACENCY = 0x000A;
-	static constexpr auto INE_STRIP_ADJACENCY = 0x000B;
+	static constexpr auto LINES_ADJACENCY = 0x000A;
+	static constexpr auto LINE_STRIP_ADJACENCY = 0x000B;
 	static constexpr auto TRIANGLES_ADJACENCY = 0x000C;
 	static constexpr auto TRIANGLE_STRIP_ADJACENCY = 0x000D;
 	static constexpr auto PROGRAM_POINT_SIZE = 0x8642;
 	static constexpr auto MAX_GEOMETRY_TEXTURE_IMAGE_UNITS = 0x8C29;
 	static constexpr auto FRAMEBUFFER_ATTACHMENT_LAYERED = 0x8DA7;
 	static constexpr auto FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS = 0x8DA8;
-	static constexpr auto EOMETRY_SHADER = 0x8DD9;
-	static constexpr auto EOMETRY_VERTICES_OUT = 0x8916;
-	static constexpr auto EOMETRY_INPUT_TYPE = 0x8917;
-	static constexpr auto EOMETRY_OUTPUT_TYPE = 0x8918;
+	static constexpr auto GEOMETRY_SHADER = 0x8DD9;
+	static constexpr auto GEOMETRY_VERTICES_OUT = 0x8916;
+	static constexpr auto GEOMETRY_INPUT_TYPE = 0x8917;
+	static constexpr auto GEOMETRY_OUTPUT_TYPE = 0x8918;
 	static constexpr auto MAX_GEOMETRY_UNIFORM_COMPONENTS = 0x8DDF;
 	static constexpr auto MAX_GEOMETRY_OUTPUT_VERTICES = 0x8DE0;
 	static constexpr auto MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS = 0x8DE1;
@@ -827,7 +827,7 @@ union GL
 	static constexpr auto DEPTH_CLAMP = 0x864F;
 	static constexpr auto QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION = 0x8E4C;
 	static constexpr auto FIRST_VERTEX_CONVENTION = 0x8E4D;
-	static constexpr auto AST_VERTEX_CONVENTION = 0x8E4E;
+	static constexpr auto LAST_VERTEX_CONVENTION = 0x8E4E;
 	static constexpr auto PROVOKING_VERTEX = 0x8E4F;
 	static constexpr auto TEXTURE_CUBE_MAP_SEAMLESS = 0x884F;
 	static constexpr auto MAX_SERVER_WAIT_TIMEOUT = 0x9111;
@@ -895,7 +895,7 @@ union GL
 	static constexpr auto UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY = 0x900F;
 	static constexpr auto DRAW_INDIRECT_BUFFER = 0x8F3F;
 	static constexpr auto DRAW_INDIRECT_BUFFER_BINDING = 0x8F43;
-	static constexpr auto EOMETRY_SHADER_INVOCATIONS = 0x887F;
+	static constexpr auto GEOMETRY_SHADER_INVOCATIONS = 0x887F;
 	static constexpr auto MAX_GEOMETRY_SHADER_INVOCATIONS = 0x8E5A;
 	static constexpr auto MIN_FRAGMENT_INTERPOLATION_OFFSET = 0x8E5B;
 	static constexpr auto MAX_FRAGMENT_INTERPOLATION_OFFSET = 0x8E5C;
@@ -962,10 +962,10 @@ union GL
 	static constexpr auto FIXED = 0x140C;
 	static constexpr auto IMPLEMENTATION_COLOR_READ_TYPE = 0x8B9A;
 	static constexpr auto IMPLEMENTATION_COLOR_READ_FORMAT = 0x8B9B;
-	static constexpr auto OW_FLOAT = 0x8DF0;
+	static constexpr auto LOW_FLOAT = 0x8DF0;
 	static constexpr auto MEDIUM_FLOAT = 0x8DF1;
 	static constexpr auto HIGH_FLOAT = 0x8DF2;
-	static constexpr auto OW_INT = 0x8DF3;
+	static constexpr auto LOW_INT = 0x8DF3;
 	static constexpr auto MEDIUM_INT = 0x8DF4;
 	static constexpr auto HIGH_INT = 0x8DF5;
 	static constexpr auto SHADER_COMPILER = 0x8DFA;
@@ -981,7 +981,7 @@ union GL
 	static constexpr auto PROGRAM_BINARY_FORMATS = 0x87FF;
 	static constexpr auto VERTEX_SHADER_BIT = 0x00000001;
 	static constexpr auto FRAGMENT_SHADER_BIT = 0x00000002;
-	static constexpr auto EOMETRY_SHADER_BIT = 0x00000004;
+	static constexpr auto GEOMETRY_SHADER_BIT = 0x00000004;
 	static constexpr auto TESS_CONTROL_SHADER_BIT = 0x00000008;
 	static constexpr auto TESS_EVALUATION_SHADER_BIT = 0x00000010;
 	static constexpr auto ALL_SHADER_BITS = 0xFFFFFFFF;
@@ -991,7 +991,7 @@ union GL
 	static constexpr auto MAX_VIEWPORTS = 0x825B;
 	static constexpr auto VIEWPORT_SUBPIXEL_BITS = 0x825C;
 	static constexpr auto VIEWPORT_BOUNDS_RANGE = 0x825D;
-	static constexpr auto AYER_PROVOKING_VERTEX = 0x825E;
+	static constexpr auto LAYER_PROVOKING_VERTEX = 0x825E;
 	static constexpr auto VIEWPORT_INDEX_PROVOKING_VERTEX = 0x825F;
 	static constexpr auto UNDEFINED_VERTEX = 0x8260;
 	static constexpr auto COPY_READ_BUFFER_BINDING = 0x8F36;
@@ -1220,8 +1220,8 @@ union GL
 	static constexpr auto READ_PIXELS_TYPE = 0x828E;
 	static constexpr auto TEXTURE_IMAGE_FORMAT = 0x828F;
 	static constexpr auto TEXTURE_IMAGE_TYPE = 0x8290;
-	static constexpr auto ET_TEXTURE_IMAGE_FORMAT = 0x8291;
-	static constexpr auto ET_TEXTURE_IMAGE_TYPE = 0x8292;
+	static constexpr auto GET_TEXTURE_IMAGE_FORMAT = 0x8291;
+	static constexpr auto GET_TEXTURE_IMAGE_TYPE = 0x8292;
 	static constexpr auto MIPMAP = 0x8293;
 	static constexpr auto MANUAL_GENERATE_MIPMAP = 0x8294;
 	static constexpr auto AUTO_GENERATE_MIPMAP = 0x8295;
@@ -1232,7 +1232,7 @@ union GL
 	static constexpr auto VERTEX_TEXTURE = 0x829B;
 	static constexpr auto TESS_CONTROL_TEXTURE = 0x829C;
 	static constexpr auto TESS_EVALUATION_TEXTURE = 0x829D;
-	static constexpr auto EOMETRY_TEXTURE = 0x829E;
+	static constexpr auto GEOMETRY_TEXTURE = 0x829E;
 	static constexpr auto FRAGMENT_TEXTURE = 0x829F;
 	static constexpr auto COMPUTE_TEXTURE = 0x82A0;
 	static constexpr auto TEXTURE_SHADOW = 0x82A1;
@@ -1293,13 +1293,13 @@ union GL
 	static constexpr auto VERTEX_SUBROUTINE = 0x92E8;
 	static constexpr auto TESS_CONTROL_SUBROUTINE = 0x92E9;
 	static constexpr auto TESS_EVALUATION_SUBROUTINE = 0x92EA;
-	static constexpr auto EOMETRY_SUBROUTINE = 0x92EB;
+	static constexpr auto GEOMETRY_SUBROUTINE = 0x92EB;
 	static constexpr auto FRAGMENT_SUBROUTINE = 0x92EC;
 	static constexpr auto COMPUTE_SUBROUTINE = 0x92ED;
 	static constexpr auto VERTEX_SUBROUTINE_UNIFORM = 0x92EE;
 	static constexpr auto TESS_CONTROL_SUBROUTINE_UNIFORM = 0x92EF;
 	static constexpr auto TESS_EVALUATION_SUBROUTINE_UNIFORM = 0x92F0;
-	static constexpr auto EOMETRY_SUBROUTINE_UNIFORM = 0x92F1;
+	static constexpr auto GEOMETRY_SUBROUTINE_UNIFORM = 0x92F1;
 	static constexpr auto FRAGMENT_SUBROUTINE_UNIFORM = 0x92F2;
 	static constexpr auto COMPUTE_SUBROUTINE_UNIFORM = 0x92F3;
 	static constexpr auto TRANSFORM_FEEDBACK_VARYING = 0x92F4;
@@ -1328,8 +1328,8 @@ union GL
 	static constexpr auto REFERENCED_BY_COMPUTE_SHADER = 0x930B;
 	static constexpr auto TOP_LEVEL_ARRAY_SIZE = 0x930C;
 	static constexpr auto TOP_LEVEL_ARRAY_STRIDE = 0x930D;
-	static constexpr auto OCATION = 0x930E;
-	static constexpr auto OCATION_INDEX = 0x930F;
+	static constexpr auto LOCATION = 0x930E;
+	static constexpr auto LOCATION_INDEX = 0x930F;
 	static constexpr auto IS_PER_PATCH = 0x92E7;
 	static constexpr auto SHADER_STORAGE_BUFFER = 0x90D2;
 	static constexpr auto SHADER_STORAGE_BUFFER_BINDING = 0x90D3;
@@ -1375,7 +1375,7 @@ union GL
 	static constexpr auto BUFFER_IMMUTABLE_STORAGE = 0x821F;
 	static constexpr auto BUFFER_STORAGE_FLAGS = 0x8220;
 	static constexpr auto CLEAR_TEXTURE = 0x9365;
-	static constexpr auto OCATION_COMPONENT = 0x934A;
+	static constexpr auto LOCATION_COMPONENT = 0x934A;
 	static constexpr auto TRANSFORM_FEEDBACK_BUFFER_INDEX = 0x934B;
 	static constexpr auto TRANSFORM_FEEDBACK_BUFFER_STRIDE = 0x934C;
 	static constexpr auto QUERY_BUFFER = 0x9192;
@@ -1396,11 +1396,11 @@ union GL
 	static constexpr auto MAX_COMBINED_CLIP_AND_CULL_DISTANCES = 0x82FA;
 	static constexpr auto TEXTURE_TARGET = 0x1006;
 	static constexpr auto QUERY_TARGET = 0x82EA;
-	static constexpr auto UILTY_CONTEXT_RESET = 0x8253;
+	static constexpr auto GUILTY_CONTEXT_RESET = 0x8253;
 	static constexpr auto INNOCENT_CONTEXT_RESET = 0x8254;
 	static constexpr auto UNKNOWN_CONTEXT_RESET = 0x8255;
 	static constexpr auto RESET_NOTIFICATION_STRATEGY = 0x8256;
-	static constexpr auto OSE_CONTEXT_ON_RESET = 0x8252;
+	static constexpr auto LOSE_CONTEXT_ON_RESET = 0x8252;
 	static constexpr auto NO_RESET_NOTIFICATION = 0x8261;
 	static constexpr auto CONTEXT_FLAG_ROBUST_ACCESS_BIT = 0x00000004;
 	static constexpr auto CONTEXT_RELEASE_BEHAVIOR = 0x82FB;
@@ -1415,7 +1415,7 @@ union GL
 	static constexpr auto VERTEX_SHADER_INVOCATIONS = 0x82F0;
 	static constexpr auto TESS_CONTROL_SHADER_PATCHES = 0x82F1;
 	static constexpr auto TESS_EVALUATION_SHADER_INVOCATIONS = 0x82F2;
-	static constexpr auto EOMETRY_SHADER_PRIMITIVES_EMITTED = 0x82F3;
+	static constexpr auto GEOMETRY_SHADER_PRIMITIVES_EMITTED = 0x82F3;
 	static constexpr auto FRAGMENT_SHADER_INVOCATIONS = 0x82F4;
 	static constexpr auto COMPUTE_SHADER_INVOCATIONS = 0x82F5;
 	static constexpr auto CLIPPING_INPUT_PRIMITIVES = 0x82F6;
@@ -1459,8 +1459,8 @@ union GL
 	static constexpr auto DEBUG_SEVERITY_HIGH_ARB = 0x9146;
 	static constexpr auto DEBUG_SEVERITY_MEDIUM_ARB = 0x9147;
 	static constexpr auto DEBUG_SEVERITY_LOW_ARB = 0x9148;
-	static constexpr auto INES_ADJACENCY_ARB = 0x000A;
-	static constexpr auto INE_STRIP_ADJACENCY_ARB = 0x000B;
+	static constexpr auto LINES_ADJACENCY_ARB = 0x000A;
+	static constexpr auto LINE_STRIP_ADJACENCY_ARB = 0x000B;
 	static constexpr auto TRIANGLES_ADJACENCY_ARB = 0x000C;
 	static constexpr auto TRIANGLE_STRIP_ADJACENCY_ARB = 0x000D;
 	static constexpr auto PROGRAM_POINT_SIZE_ARB = 0x8642;
@@ -1468,10 +1468,10 @@ union GL
 	static constexpr auto FRAMEBUFFER_ATTACHMENT_LAYERED_ARB = 0x8DA7;
 	static constexpr auto FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_ARB = 0x8DA8;
 	static constexpr auto FRAMEBUFFER_INCOMPLETE_LAYER_COUNT_ARB = 0x8DA9;
-	static constexpr auto EOMETRY_SHADER_ARB = 0x8DD9;
-	static constexpr auto EOMETRY_VERTICES_OUT_ARB = 0x8DDA;
-	static constexpr auto EOMETRY_INPUT_TYPE_ARB = 0x8DDB;
-	static constexpr auto EOMETRY_OUTPUT_TYPE_ARB = 0x8DDC;
+	static constexpr auto GEOMETRY_SHADER_ARB = 0x8DD9;
+	static constexpr auto GEOMETRY_VERTICES_OUT_ARB = 0x8DDA;
+	static constexpr auto GEOMETRY_INPUT_TYPE_ARB = 0x8DDB;
+	static constexpr auto GEOMETRY_OUTPUT_TYPE_ARB = 0x8DDC;
 	static constexpr auto MAX_GEOMETRY_VARYING_COMPONENTS_ARB = 0x8DDD;
 	static constexpr auto MAX_VERTEX_VARYING_COMPONENTS_ARB = 0x8DDE;
 	static constexpr auto MAX_GEOMETRY_UNIFORM_COMPONENTS_ARB = 0x8DDF;
@@ -1516,7 +1516,7 @@ union GL
 	static constexpr auto VERTEX_SHADER_INVOCATIONS_ARB = 0x82F0;
 	static constexpr auto TESS_CONTROL_SHADER_PATCHES_ARB = 0x82F1;
 	static constexpr auto TESS_EVALUATION_SHADER_INVOCATIONS_ARB = 0x82F2;
-	static constexpr auto EOMETRY_SHADER_PRIMITIVES_EMITTED_ARB = 0x82F3;
+	static constexpr auto GEOMETRY_SHADER_PRIMITIVES_EMITTED_ARB = 0x82F3;
 	static constexpr auto FRAGMENT_SHADER_INVOCATIONS_ARB = 0x82F4;
 	static constexpr auto COMPUTE_SHADER_INVOCATIONS_ARB = 0x82F5;
 	static constexpr auto CLIPPING_INPUT_PRIMITIVES_ARB = 0x82F6;
@@ -1526,8 +1526,8 @@ union GL
 	static constexpr auto PIXEL_PACK_BUFFER_BINDING_ARB = 0x88ED;
 	static constexpr auto PIXEL_UNPACK_BUFFER_BINDING_ARB = 0x88EF;
 	static constexpr auto CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB = 0x00000004;
-	static constexpr auto OSE_CONTEXT_ON_RESET_ARB = 0x8252;
-	static constexpr auto UILTY_CONTEXT_RESET_ARB = 0x8253;
+	static constexpr auto LOSE_CONTEXT_ON_RESET_ARB = 0x8252;
+	static constexpr auto GUILTY_CONTEXT_RESET_ARB = 0x8253;
 	static constexpr auto INNOCENT_CONTEXT_RESET_ARB = 0x8254;
 	static constexpr auto UNKNOWN_CONTEXT_RESET_ARB = 0x8255;
 	static constexpr auto RESET_NOTIFICATION_STRATEGY_ARB = 0x8256;
@@ -1587,7 +1587,7 @@ union GL
 	static constexpr auto SCREEN_KHR = 0x9295;
 	static constexpr auto OVERLAY_KHR = 0x9296;
 	static constexpr auto DARKEN_KHR = 0x9297;
-	static constexpr auto IGHTEN_KHR = 0x9298;
+	static constexpr auto LIGHTEN_KHR = 0x9298;
 	static constexpr auto COLORDODGE_KHR = 0x9299;
 	static constexpr auto COLORBURN_KHR = 0x929A;
 	static constexpr auto HARDLIGHT_KHR = 0x929B;
@@ -1691,18 +1691,18 @@ union GL
 	static constexpr auto SKIP_DECODE_EXT = 0x8A4A;
 	static constexpr auto TEXTURE_IMMUTABLE_FORMAT_EXT = 0x912F;
 	static constexpr auto ALPHA8_EXT = 0x803C;
-	static constexpr auto UMINANCE8_EXT = 0x8040;
-	static constexpr auto UMINANCE8_ALPHA8_EXT = 0x8045;
+	static constexpr auto LUMINANCE8_EXT = 0x8040;
+	static constexpr auto LUMINANCE8_ALPHA8_EXT = 0x8045;
 	static constexpr auto RGBA32F_EXT = 0x8814;
 	static constexpr auto RGB32F_EXT = 0x8815;
 	static constexpr auto ALPHA32F_EXT = 0x8816;
-	static constexpr auto UMINANCE32F_EXT = 0x8818;
-	static constexpr auto UMINANCE_ALPHA32F_EXT = 0x8819;
+	static constexpr auto LUMINANCE32F_EXT = 0x8818;
+	static constexpr auto LUMINANCE_ALPHA32F_EXT = 0x8819;
 	static constexpr auto RGBA16F_EXT = 0x881A;
 	static constexpr auto RGB16F_EXT = 0x881B;
 	static constexpr auto ALPHA16F_EXT = 0x881C;
-	static constexpr auto UMINANCE16F_EXT = 0x881E;
-	static constexpr auto UMINANCE_ALPHA16F_EXT = 0x881F;
+	static constexpr auto LUMINANCE16F_EXT = 0x881E;
+	static constexpr auto LUMINANCE_ALPHA16F_EXT = 0x881F;
 	static constexpr auto RGB10_A2_EXT = 0x8059;
 	static constexpr auto RGB10_EXT = 0x8052;
 	static constexpr auto BGRA8_EXT = 0x93A1;
@@ -1759,7 +1759,7 @@ union GL
 	static constexpr auto DST_OUT_NV = 0x928D;
 	static constexpr auto DST_OVER_NV = 0x9289;
 	static constexpr auto EXCLUSION_NV = 0x92A0;
-	static constexpr auto REEN_NV = 0x1904;
+	static constexpr auto GREEN_NV = 0x1904;
 	static constexpr auto HARDLIGHT_NV = 0x929B;
 	static constexpr auto HARDMIX_NV = 0x92A9;
 	static constexpr auto HSL_COLOR_NV = 0x92AF;
@@ -1768,10 +1768,10 @@ union GL
 	static constexpr auto HSL_SATURATION_NV = 0x92AE;
 	static constexpr auto INVERT_OVG_NV = 0x92B4;
 	static constexpr auto INVERT_RGB_NV = 0x92A3;
-	static constexpr auto IGHTEN_NV = 0x9298;
-	static constexpr auto INEARBURN_NV = 0x92A5;
-	static constexpr auto INEARDODGE_NV = 0x92A4;
-	static constexpr auto INEARLIGHT_NV = 0x92A7;
+	static constexpr auto LIGHTEN_NV = 0x9298;
+	static constexpr auto LINEARBURN_NV = 0x92A5;
+	static constexpr auto LINEARDODGE_NV = 0x92A4;
+	static constexpr auto LINEARLIGHT_NV = 0x92A7;
 	static constexpr auto MINUS_CLAMPED_NV = 0x92B3;
 	static constexpr auto MINUS_NV = 0x929F;
 	static constexpr auto MULTIPLY_NV = 0x9294;
@@ -1811,7 +1811,7 @@ union GL
 	static constexpr auto UNIFORM_ADDRESS_COMMAND_NV = 0x000A;
 	static constexpr auto BLEND_COLOR_COMMAND_NV = 0x000B;
 	static constexpr auto STENCIL_REF_COMMAND_NV = 0x000C;
-	static constexpr auto INE_WIDTH_COMMAND_NV = 0x000D;
+	static constexpr auto LINE_WIDTH_COMMAND_NV = 0x000D;
 	static constexpr auto POLYGON_OFFSET_COMMAND_NV = 0x000E;
 	static constexpr auto ALPHA_REF_COMMAND_NV = 0x000F;
 	static constexpr auto VIEWPORT_COMMAND_NV = 0x0010;
@@ -2011,7 +2011,7 @@ union GL
 	static constexpr auto CLOSE_PATH_NV = 0x00;
 	static constexpr auto MOVE_TO_NV = 0x02;
 	static constexpr auto RELATIVE_MOVE_TO_NV = 0x03;
-	static constexpr auto INE_TO_NV = 0x04;
+	static constexpr auto LINE_TO_NV = 0x04;
 	static constexpr auto RELATIVE_LINE_TO_NV = 0x05;
 	static constexpr auto HORIZONTAL_LINE_TO_NV = 0x06;
 	static constexpr auto RELATIVE_HORIZONTAL_LINE_TO_NV = 0x07;
@@ -2029,9 +2029,9 @@ union GL
 	static constexpr auto RELATIVE_SMALL_CCW_ARC_TO_NV = 0x13;
 	static constexpr auto SMALL_CW_ARC_TO_NV = 0x14;
 	static constexpr auto RELATIVE_SMALL_CW_ARC_TO_NV = 0x15;
-	static constexpr auto ARGE_CCW_ARC_TO_NV = 0x16;
+	static constexpr auto LARGE_CCW_ARC_TO_NV = 0x16;
 	static constexpr auto RELATIVE_LARGE_CCW_ARC_TO_NV = 0x17;
-	static constexpr auto ARGE_CW_ARC_TO_NV = 0x18;
+	static constexpr auto LARGE_CW_ARC_TO_NV = 0x18;
 	static constexpr auto RELATIVE_LARGE_CW_ARC_TO_NV = 0x19;
 	static constexpr auto RESTART_PATH_NV = 0xF0;
 	static constexpr auto DUP_FIRST_CUBIC_CURVE_TO_NV = 0xF2;
@@ -2044,15 +2044,15 @@ union GL
 	static constexpr auto RELATIVE_ARC_TO_NV = 0xFF;
 	static constexpr auto BOLD_BIT_NV = 0x01;
 	static constexpr auto ITALIC_BIT_NV = 0x02;
-	static constexpr auto YPH_WIDTH_BIT_NV = 0x01;
-	static constexpr auto YPH_HEIGHT_BIT_NV = 0x02;
-	static constexpr auto YPH_HORIZONTAL_BEARING_X_BIT_NV = 0x04;
-	static constexpr auto YPH_HORIZONTAL_BEARING_Y_BIT_NV = 0x08;
-	static constexpr auto YPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV = 0x10;
-	static constexpr auto YPH_VERTICAL_BEARING_X_BIT_NV = 0x20;
-	static constexpr auto YPH_VERTICAL_BEARING_Y_BIT_NV = 0x40;
-	static constexpr auto YPH_VERTICAL_BEARING_ADVANCE_BIT_NV = 0x80;
-	static constexpr auto YPH_HAS_KERNING_BIT_NV = 0x100;
+	static constexpr auto GLYPH_WIDTH_BIT_NV = 0x01;
+	static constexpr auto GLYPH_HEIGHT_BIT_NV = 0x02;
+	static constexpr auto GLYPH_HORIZONTAL_BEARING_X_BIT_NV = 0x04;
+	static constexpr auto GLYPH_HORIZONTAL_BEARING_Y_BIT_NV = 0x08;
+	static constexpr auto GLYPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV = 0x10;
+	static constexpr auto GLYPH_VERTICAL_BEARING_X_BIT_NV = 0x20;
+	static constexpr auto GLYPH_VERTICAL_BEARING_Y_BIT_NV = 0x40;
+	static constexpr auto GLYPH_VERTICAL_BEARING_ADVANCE_BIT_NV = 0x80;
+	static constexpr auto GLYPH_HAS_KERNING_BIT_NV = 0x100;
 	static constexpr auto FONT_X_MIN_BOUNDS_BIT_NV = 0x00010000;
 	static constexpr auto FONT_Y_MIN_BOUNDS_BIT_NV = 0x00020000;
 	static constexpr auto FONT_X_MAX_BOUNDS_BIT_NV = 0x00040000;
@@ -2109,7 +2109,7 @@ union GL
 	static constexpr auto SCISSOR_TEST_EXCLUSIVE_NV = 0x9555;
 	static constexpr auto SCISSOR_BOX_EXCLUSIVE_NV = 0x9556;
 	static constexpr auto BUFFER_GPU_ADDRESS_NV = 0x8F1D;
-	static constexpr auto PU_ADDRESS_NV = 0x8F34;
+	static constexpr auto GPU_ADDRESS_NV = 0x8F34;
 	static constexpr auto MAX_SHADER_BUFFER_ADDRESS_NV = 0x8F35;
 	static constexpr auto SHADER_GLOBAL_ACCESS_BARRIER_BIT_NV = 0x00000010;
 	static constexpr auto SUBGROUP_FEATURE_PARTITIONED_BIT_NV = 0x00000100;

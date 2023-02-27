@@ -154,7 +154,7 @@ include_guards_end = {
 	'wgl' : '#endif /* GAL_WGL_HEADER_H */\n'
 }
 
-gl_define_GALGLPROC = '#ifdef _WIN32\n#define GALGLPROC WINAPI\n#else\n#define GALGLPROC\n#endif\n'
+gl_define_GALGLPROC = '#ifdef _WIN32\n#define GALGLPROC __stdcall\n#else\n#define GALGLPROC\n#endif\n'
 
 proc_header_pattern = {
 	'gl' : re.compile(r'GLAPI(.*)APIENTRY (\w+) (\(.*\)).*'),
@@ -193,7 +193,7 @@ def define_to_constant(define, header)->str:
 	name = dm.group(1)
 	if name != 'GL_FALSE' and name != 'GL_TRUE' and name != 'GL_WAIT_FAILED': # this constants without the GL prefix collide with Win32 API
 		if remove_gl_prefix:
-			temp_name = name.lstrip(header.upper() + '_')
+			temp_name = name.removeprefix(header.upper() + '_')
 			if not temp_name[0].isdigit(): # avoid constants starting with number names, it's an invalid syntax
 				name = temp_name
 	value = dm.group(2)
