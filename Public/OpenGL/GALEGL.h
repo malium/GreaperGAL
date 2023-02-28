@@ -76,6 +76,8 @@ typedef uint64_t EGLTime;
 typedef uint64_t EGLTimeNV;
 typedef uint64_t EGLuint64NV;
 typedef uint64_t EGLuint64KHR;
+typedef int64_t EGLint64NV;
+typedef int64_t EGLint64KHR;
 typedef int64_t EGLnsecsANDROID;
 typedef int32_t EGLNativeFileDescriptorKHR;
 typedef intptr_t EGLsizeiANDROID;
@@ -407,6 +409,7 @@ union EGL
 	static constexpr EGLenum SYNC_NATIVE_FENCE_ANDROID = 0x3144;
 	static constexpr EGLenum SYNC_NATIVE_FENCE_FD_ANDROID = 0x3145;
 	static constexpr EGLenum SYNC_NATIVE_FENCE_SIGNALED_ANDROID = 0x3146;
+	static constexpr EGLint NO_NATIVE_FENCE_FD_ANDROID = -1;
 	static constexpr EGLenum RECORDABLE_ANDROID = 0x3142;
 	static constexpr EGLenum D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE = 0x3200;
 	static constexpr EGLenum D3D9_DEVICE_ANGLE = 0x33A0;

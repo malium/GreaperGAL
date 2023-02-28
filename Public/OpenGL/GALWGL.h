@@ -84,15 +84,19 @@ union WGL
 	static constexpr GLenum CONTEXT_MINOR_VERSION_ARB = 0x2092;
 	static constexpr GLenum CONTEXT_LAYER_PLANE_ARB = 0x2093;
 	static constexpr GLenum CONTEXT_FLAGS_ARB = 0x2094;
+	static constexpr GLenum ERROR_INVALID_VERSION_ARB = 0x2095;
 	static constexpr GLenum CONTEXT_OPENGL_NO_ERROR_ARB = 0x31B3;
 	static constexpr GLenum CONTEXT_PROFILE_MASK_ARB = 0x9126;
 	static constexpr GLenum CONTEXT_CORE_PROFILE_BIT_ARB = 0x00000001;
 	static constexpr GLenum CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB = 0x00000002;
+	static constexpr GLenum ERROR_INVALID_PROFILE_ARB = 0x2096;
 	static constexpr GLenum CONTEXT_ROBUST_ACCESS_BIT_ARB = 0x00000004;
 	static constexpr GLenum LOSE_CONTEXT_ON_RESET_ARB = 0x8252;
 	static constexpr GLenum CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB = 0x8256;
 	static constexpr GLenum NO_RESET_NOTIFICATION_ARB = 0x8261;
 	static constexpr GLenum FRAMEBUFFER_SRGB_CAPABLE_ARB = 0x20A9;
+	static constexpr GLenum ERROR_INVALID_PIXEL_TYPE_ARB = 0x2043;
+	static constexpr GLenum ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB = 0x2054;
 	static constexpr GLenum SAMPLE_BUFFERS_ARB = 0x2041;
 	static constexpr GLenum SAMPLES_ARB = 0x2042;
 	static constexpr GLenum DRAW_TO_PBUFFER_ARB = 0x202D;
@@ -212,6 +216,7 @@ union WGL
 	static constexpr GLenum CONTEXT_ES_PROFILE_BIT_EXT = 0x00000004;
 	static constexpr GLenum DEPTH_FLOAT_EXT = 0x2040;
 	static constexpr GLenum FRAMEBUFFER_SRGB_CAPABLE_EXT = 0x20A9;
+	static constexpr GLenum ERROR_INVALID_PIXEL_TYPE_EXT = 0x2043;
 	static constexpr GLenum SAMPLE_BUFFERS_EXT = 0x2041;
 	static constexpr GLenum SAMPLES_EXT = 0x2042;
 	static constexpr GLenum DRAW_TO_PBUFFER_EXT = 0x202D;
@@ -298,6 +303,8 @@ union WGL
 	static constexpr GLenum TEXTURE_FLOAT_RG_NV = 0x20B6;
 	static constexpr GLenum TEXTURE_FLOAT_RGB_NV = 0x20B7;
 	static constexpr GLenum TEXTURE_FLOAT_RGBA_NV = 0x20B8;
+	static constexpr GLenum ERROR_INCOMPATIBLE_AFFINITY_MASKS_NV = 0x20D0;
+	static constexpr GLenum ERROR_MISSING_AFFINITY_MASK_NV = 0x20D1;
 	static constexpr GLenum CONTEXT_MULTIGPU_ATTRIB_NV = 0x20AA;
 	static constexpr GLenum CONTEXT_MULTIGPU_ATTRIB_SINGLE_NV = 0x20AB;
 	static constexpr GLenum CONTEXT_MULTIGPU_ATTRIB_AFR_NV = 0x20AC;

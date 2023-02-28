@@ -20,6 +20,7 @@ remove_gl_prefix = True
 c_compatible = False
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# ignored = open("ignored.txt", "w")
 
 urls = {
 	'gl' : ['https://www.khronos.org/registry/OpenGL/api/GL/glcorearb.h'],
@@ -65,11 +66,12 @@ proc_patterns = {
 	'egl' : re.compile(r'EGLAPI.*EGLAPIENTRY\s+(\w+)')
 }
 
+define_error_pattern = re.compile(r'#define.*(ERROR+\w+)\s+([a-zA-Z0-9_\-]+)')
 define_patterns = {
-	'gl' : re.compile(r'#define.*(GL+\w+)\s+(\w+)'),
-	'glx' : re.compile(r'#define.*(GLX+\w+)\s+(\w+)'),
-	'wgl' : re.compile(r'#define.*(WGL+\w+)\s+(\w+)'),
-	'egl' : re.compile(r'#define.*(EGL+\w+)\s+(\w+)')
+	'gl' : re.compile(r'#define.*(GL+\w+)\s+([a-zA-Z0-9_\-]+)'),
+	'glx' : re.compile(r'#define.*(GLX+\w+)\s+([a-zA-Z0-9_\-]+)'),
+	'wgl' : re.compile(r'#define.*(WGL+\w+)\s+([a-zA-Z0-9_\-]+)'),
+	'egl' : re.compile(r'#define.*(EGL+\w+)\s+([a-zA-Z0-9_\-]+)')
 }
 
 callback_patterns = {
@@ -86,7 +88,22 @@ handle_patterns = {
 	'egl' : None
 }
 
-ignore_d = re.compile(r'#define +\w+ 1')
+ignore_d = re.compile(r'#define\W+\w+[^a-zA-Z0-9_\-]+1$')
+ignore_define_version = {
+	'gl' : re.compile(r'.*GL_VERSION.*1$'),
+	'glx' : re.compile(r'.*GLX_VERSION.*1$'),
+	'wgl' : re.compile(r'.*WGL_VERSION.*1$'),
+	'egl' : re.compile(r'.*EGL_VERSION.*1$')
+}
+not_ignore_define = {
+	'gl' : re.compile(r'#define\W+GL_[A-Z0-9_]+\W+1$'),
+	'glx' : re.compile(r'#define\W+GLX_[A-Z0-9_]+\W+1$'),
+	'wgl' : re.compile(r'#define\W+WGL_[A-Z0-9_]+\W+1$'),
+	'egl' : re.compile(r'#define\W+EGL_[A-Z0-9_]+\W+1$')
+}
+
+ignore_wgl_define = re.compile('')
+
 ignore_typedef = re.compile(r'typedef \w+ \w+;')
 ignore_typedef_fn = re.compile(r'.*PFN.*')
 
@@ -164,6 +181,8 @@ typedict= {
 		'EGLTimeNV' : 'uint64_t',
 		'EGLuint64NV' : 'uint64_t',
 		'EGLuint64KHR' : 'uint64_t',
+		'EGLint64NV' : 'int64_t',
+		'EGLint64KHR' : 'int64_t',
 		'EGLnsecsANDROID' : 'int64_t',
 		'EGLNativeFileDescriptorKHR' : 'int32_t',
 		'EGLsizeiANDROID' : 'intptr_t',
@@ -243,7 +262,7 @@ proc_header_pattern = {
 	'egl' : re.compile(r'EGLAPI(.*)EGLAPIENTRY (\w+) (\(.*\)).*')
 }
 
-constant_pattern = re.compile(r'#\w+\W+(\w+)\W+(.*)')
+constant_pattern = re.compile(r'#\w+\W+(\w+)[^a-zA-Z0-9_\-]+(.*)')
 
 callback_info_patterns = {
 	'gl': [re.compile(r'typedef(.*)\(APIENTRY  \*(\w+)\)(\(.*\)).*')],
@@ -276,10 +295,20 @@ def proc_to_name(proc, header)->str:
 	pm = proc_header_pattern[header].match(proc)
 	return pm.group(2).strip()
 
+def constant_type_from_number(ival:int, constant_enum:str, constant_uint64:str, constant_ienum:str, constant_int64:str):
+	if ival >= 0 and ival <= 4294967295:
+		return constant_enum
+	elif ival > 4294967295:
+		return constant_uint64
+	elif ival > -4294967295:
+		return constant_ienum
+	else:
+		return constant_int64
+
 def define_to_constant(define, header)->str:
 	dm = constant_pattern.match(define)
 	name = dm.group(1)
-	if not name.startswith(header.upper()):
+	if not name.startswith(header.upper()) and not name.startswith('ERROR'):
 		return ''
 	if remove_gl_prefix:
 		temp_name = name.removeprefix(header.upper() + '_')
@@ -291,25 +320,28 @@ def define_to_constant(define, header)->str:
 	constant_type = ''
 	constant_enum = ''
 	constant_uint64 = ''
+	constant_ienum = ''
+	constant_int64 = ''
 	if header != 'egl':
 		constant_enum = 'GLenum'
 		constant_uint64 = 'GLuint64'
+		constant_ienum = 'GLint'
+		constant_int64 = 'GLint64'
 	else:
 		constant_enum = 'EGLenum'
 		constant_uint64 = 'EGLuint64KHR'
-	
+		constant_ienum = 'EGLint'
+		constant_int64 = 'EGLint64KHR'
+
 	if value.startswith('0x'):
 		ival = int(value, 16)
-		if ival <= 4294967295:
-			constant_type = constant_enum
-		else:
-			constant_type = constant_uint64
-	elif value.isdigit():
+		constant_type = constant_type_from_number(ival, constant_enum, constant_uint64, constant_ienum, constant_int64)
+	elif value.isdecimal():
 		ival = int(value)
-		if ival <= 4294967295:
-			constant_type = constant_enum
-		else:
-			constant_type = constant_uint64
+		constant_type = constant_type_from_number(ival, constant_enum, constant_uint64, constant_ienum, constant_int64)
+	elif value.startswith('-') and value.removeprefix('-').isdigit():
+		ival = int(value)
+		constant_type = constant_type_from_number(ival, constant_enum, constant_uint64, constant_ienum, constant_int64)
 	else:
 		constant_type = 'auto'
 	return 'static constexpr %s %s = %s;'%(constant_type, name, value)
@@ -345,13 +377,22 @@ def parse_header(header:str):
 		for line in weblines:
 			if len(multiline_struct) <= 0:
 				m = ignore_d.match(line)
-				if m is not None:
-					print(line)
+				if m is not None: # a define that ends with 1
+					if header == 'egl' and line.count('EGL_PROTOTYPES') > 0:
+						continue
+					m = ignore_define_version[header].match(line)
+					if m is not None: # is a XGLX_VERSION_X_X define
+						continue
+					m = not_ignore_define[header].match(line)
+					if m is not None: # an important define that ends with a 1
+						defines[header].append(str(line).strip(' \n\r'))
+						continue
+					# ignored.write(line)
 					continue
 					
 				m = ignore_typedef.match(line)
 				if m is not None:
-					print(line)
+					# ignored.write(line)
 					continue
 
 				m = proc_pattern.match(line)
@@ -387,6 +428,11 @@ def parse_header(header:str):
 
 					defines[header].append(str(line).strip(' \n\r'))
 					continue
+
+				m = define_error_pattern.match(line)
+				if m is not None:
+					defines[header].append(str(line).strip(' \n\r'))
+					continue
 				
 				m = struct_define.match(line)
 				if m is not None:
@@ -412,7 +458,7 @@ def parse_header(header:str):
 					multiline_struct = str(line)
 					continue
 
-				print(line)
+				# ignored.write(line)
 			else: # multiline struct definition
 				m = struct_typedef_multiline_end.match(line)
 				mm = struct_multiline_end.match(line)
