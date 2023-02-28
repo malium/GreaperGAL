@@ -11,6 +11,7 @@
 #include "WinWindow.h"
 #include "../../../GreaperCore/Public/Win/Win32GDI.h"
 #include "../OpenGL/GALWGL.h"
+#include "../OpenGL/GALEGL.h"
 #include "../OpenGL/GLDefines.h"
 
 namespace greaper::gal
