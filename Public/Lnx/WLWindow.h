@@ -16,6 +16,7 @@ namespace greaper::gal
 	{
 		
 	};
+	
 	class WLWindow : public IWindow
 	{
 		

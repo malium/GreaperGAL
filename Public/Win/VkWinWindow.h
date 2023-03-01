@@ -14,7 +14,10 @@ namespace greaper::gal
 {
 	struct WinVkWindowDesc : public WinWindowDesc
 	{
-
+	protected:
+		RenderBackend_t Backend = RenderBackend_t::Vulkan;
+	public:
+		
 	};
 	
 	class WinVkWindow : public WinWindow

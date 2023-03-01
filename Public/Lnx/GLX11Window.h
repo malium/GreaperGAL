@@ -9,12 +9,16 @@
 #define GAL_GL_X11_WINDOW_H 1
 
 #include "X11Window.h"
+#include "../OpenGL/GLDefines.h"
 #include "../OpenGL/GALGLX.h"
 
 namespace greaper::gal
 {
 	struct GLX11WindowDesc : public X11WindowDesc
 	{
+	protected:
+		RenderBackend_t Backend = RenderBackend_t::OpenGL;
+	public:
 		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native;
 		int32 VersionMajor = -1; // Negative values selects the maximum version supported by the adapter
 		int32 VersionMinor = -1; // Negative values selects the maximum version supported by the adapter
@@ -25,6 +29,7 @@ namespace greaper::gal
 		bool ContextGenerateErrors = true; // GL_KHR_no_error
 		PWindow SharedContextWindow = PWindow();
 	};
+	
 	class GLX11Window : public X11Window
 	{
 		

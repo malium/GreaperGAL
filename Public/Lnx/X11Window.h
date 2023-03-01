@@ -17,6 +17,7 @@ namespace greaper::gal
 		StringView X11ClassName = ""sv;
 		StringView X11InstanceName = ""sv;
 	};
+	
 	class X11Window : public IWindow
 	{
 		

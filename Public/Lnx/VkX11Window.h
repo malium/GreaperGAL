@@ -14,8 +14,12 @@ namespace greaper::gal
 {
 	struct VkX11WindowDesc : public X11WindowDesc
 	{
+	protected:
+		RenderBackend_t Backend = RenderBackend_t::Vulkan;
+	public:
 		
 	};
+	
 	class VkX11Window : public X11Window
 	{
 		

@@ -14,8 +14,12 @@ namespace greaper::gal
 {
 	struct VkWLWindowDesc : public WLWindowDesc
 	{
+	protected:
+		RenderBackend_t Backend = RenderBackend_t::Vulkan;
+	public:
 		
 	};
+	
 	class VkWLWindow : public WLWindow
 	{
 		

@@ -36,10 +36,12 @@ namespace greaper::gal
 	};
 	struct WindowDesc
 	{
+	protected:
+		RenderBackend_t Backend = RenderBackend_t::Native; // Native will create a default Window using the native OS interface, OpenGL and Vulkan needs special initialization during window creation
+	public:
 		WStringView Title = L"Greaper Window"sv;
 		math::Vector2i Size = math::Vector2i(1280, 720); // The size of the window taking into account the window decoration (unless borderless or fullscreen)
 		AnchoredPosition_t Position = AnchoredPosition_t::Center; // Try to move the window to certain anchor position (some platforms don't care about the initial position set)
-		RenderBackend_t Backend = RenderBackend_t::Native; // Native will create a default Window using the native OS interface, OpenGL and Vulkan needs special initialization during window creation
 		WindowMode_t Mode = WindowMode_t::Windowed;
 		WindowState_t State = WindowState_t::Normal;
 		bool ResizingEnabled = true; // Allow to resize the window by the user
@@ -53,6 +55,7 @@ namespace greaper::gal
 		PWindow ParentWindow = PWindow();
 		FramebufferDesc Framebuffer = FramebufferDesc();
 
+		INLINE RenderBackend_t GetBackend()const noexcept { return Backend; }
 		constexpr WindowDesc()noexcept = default;
 	};
 
