@@ -20,7 +20,14 @@ namespace greaper::gal
 	
 	class WinWindow : public IWindow
 	{
-		
+	public:
+		using MessageFn = std::function<LRESULT(WinWindow* window, WPARAM wParam, LPARAM lParam)>;
+	protected:
+		HWND m_WindowHandle;
+		DWORD m_Style;
+		DWORD m_StyleEx;
+		Map<UINT, MessageFn> m_MessageMap;
+
 	};
 }
 

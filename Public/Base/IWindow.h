@@ -61,6 +61,14 @@ namespace greaper::gal
 
 	class IWindow
 	{
+	public:
+		// These events are triggered only by the connected window
+		using WindowClosingEvent_t = Event<const PWindow&>;
+		using WindowMovedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
+		using WindowResizedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
+		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
+		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
+
 	protected:
 		mutable RWMutex m_Mutex;
 		WString m_Title;
@@ -80,14 +88,13 @@ namespace greaper::gal
 		PTaskScheduler m_TaskScheduler;
 		PWindow m_This;
 
-	public:
-		// These events are triggered only by the connected window
-		using WindowClosingEvent = Event<const PWindow&>;
-		using WindowMovedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
-		using WindowResizedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
-		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
-		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
+		mutable WindowClosingEvent_t m_WindowClosingEvt;
+		mutable WindowMovedEvent_t m_WindowMovedEvt;
+		mutable WindowResizedEvent_t m_WindowResizedEvt;
+		mutable WindowModeChangedEvent_t m_WindowModeChangedEvt;
+		mutable WindowStateChangedEvent_t m_WindowStateChangedEvt;
 
+	public:
 		IWindow()noexcept = default;
 		virtual ~IWindow() = default;
 
@@ -143,6 +150,12 @@ namespace greaper::gal
 		INLINE WWindowManager GetWindowManager()const noexcept { return m_WindowManager; }
 
 		INLINE PTaskScheduler GetTaskScheduler()const noexcept { return m_TaskScheduler; }
+
+		INLINE WindowClosingEvent_t& GetClosingEvent()const noexcept { return m_WindowClosingEvt; }
+		INLINE WindowMovedEvent_t& GetMovedEvent()const noexcept { return m_WindowMovedEvt; }
+		INLINE WindowResizedEvent_t& GetResizedEvent()const noexcept { return m_WindowResizedEvt; }
+		INLINE WindowModeChangedEvent_t& GetModeChangedEvent()const noexcept { return m_WindowModeChangedEvt; }
+		INLINE WindowStateChangedEvent_t& GetStateChangedEvent()const noexcept { return m_WindowStateChangedEvt; }
 	};
 }
 
