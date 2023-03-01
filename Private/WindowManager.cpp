@@ -5,12 +5,91 @@
 
 #include "WindowManager.h"
 #include "GreaperGALDLL.h"
+#if PLT_WINDOWS
+#include "../Public/Win/WinWindow.h"
+#include "../Public/Win/GLWinWindow.h"
+#include "../Public/Win/VkWinWindow.h"
+#elif PLT_LINUX
+
+#endif
 
 using namespace greaper;
 using namespace greaper::gal;
 
 SPtr<WindowManager> gWindowManager = {};
 extern SPtr<GreaperGALLibrary> gGALLibrary;
+
+void greaper::gal::WindowManager::OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface) noexcept
+{
+
+}
+
+void greaper::gal::WindowManager::OnNewManager(const PInterface& newInterface) noexcept
+{
+
+}
+
+#if PLT_WINDOWS
+TResult<PWindow> greaper::gal::WindowManager::CreateWinNativeWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateWinNativeOpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateWinEGLOpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateWinNativeVulkanWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+#elif PLT_LINUX
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxX11Window(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxX11OpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxX11EGLOpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxX11MESAOpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxX11VulkanWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxWLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxWLOpenGLWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+
+TResult<PWindow> greaper::gal::WindowManager::CreateLnxWLVulkanWindow(const WindowDesc& desc)
+{
+	return TResult<PWindow>();
+}
+#endif
 
 static PMonitor CreateMonitor(void* monitorInfo, int32 index)
 {
@@ -249,9 +328,35 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& desc)
 	if(scheduler == nullptr)
 		scheduler = MPMCTaskScheduler::Create(m_ThreadManager, "GreaperWindow TaskScheduler"sv, 1, false);
 	
+	if (scheduler->GetWorkerCount() != 1)
+		return Result::CreateFailure<PWindow>(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", scheduler->GetWorkerCount()));
 	
+#if PLT_WINDOWS
+	switch (desc.GetBackend())
+	{
+	case RenderBackend_t::Native:
+	{
+		return CreateWinNativeWindow(desc);
+	}
+	case RenderBackend_t::OpenGL:
+	{
+		auto glDesc = (const WinGLWindowDesc&)desc;
+		if (glDesc.CreationAPI == OpenGLCreationAPI_t::Native)
+			return CreateWinNativeOpenGLWindow(desc);
+		else if(glDesc.CreationAPI == OpenGLCreationAPI_t::EGL)
+			return CreateWinEGLOpenGLWindow(desc);
+		else
+			return Result::CreateFailure<PWindow>(Format("Trying to create an OpenGL Windows window but an invalid creation API was choosen %s.", TEnum<OpenGLCreationAPI_t>::ToString(glDesc.CreationAPI).data()));
+	}
+	case RenderBackend_t::Vulkan:
+	{
 
-	return Result::CreateFailure<PWindow>("Not implemented"sv);
+	}
+	}
+#elif PLT_LINUX
+
+#endif
+	return Result::CreateFailure<PWindow>("Platform not implemented"sv);
 }
 
 void WindowManager::PollEvents()
@@ -282,4 +387,3 @@ void WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& acc
 	SharedLock lock(m_WindowMutex);
 	accessFn(CreateSpan(m_Windows));
 }
-

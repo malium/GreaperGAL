@@ -21,6 +21,7 @@ namespace greaper::gal
 	protected:
 		RenderBackend_t Backend = RenderBackend_t::OpenGL;
 	public:
+		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native;
 		int32 VersionMajor = -1; // Negative values selects the maximum version supported by the adapter
 		int32 VersionMinor = -1; // Negative values selects the maximum version supported by the adapter
 		OpenGLProfile_t Profile = OpenGLProfile_t::Core;
