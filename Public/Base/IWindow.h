@@ -38,6 +38,7 @@ namespace greaper::gal
 	{
 	protected:
 		RenderBackend_t Backend = RenderBackend_t::Native; // Native will create a default Window using the native OS interface, OpenGL and Vulkan needs special initialization during window creation
+		
 	public:
 		WStringView Title = L"Greaper Window"sv;
 		math::Vector2i Size = math::Vector2i(1280, 720); // The size of the window taking into account the window decoration (unless borderless or fullscreen)
@@ -55,7 +56,7 @@ namespace greaper::gal
 		PWindow ParentWindow = PWindow();
 		FramebufferDesc Framebuffer = FramebufferDesc();
 
-		INLINE RenderBackend_t GetBackend()const noexcept { return Backend; }
+		INLINE constexpr RenderBackend_t GetBackend()const noexcept { return Backend; }
 		constexpr WindowDesc()noexcept = default;
 	};
 

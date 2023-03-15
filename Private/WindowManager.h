@@ -33,22 +33,6 @@ namespace greaper::gal
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
 		void OnNewManager(const PInterface& newInterface)noexcept;
 
-#if PLT_WINDOWS
-		TResult<PWindow> CreateWinNativeWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateWinNativeOpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateWinEGLOpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateWinNativeVulkanWindow(const WindowDesc& desc);
-#elif PLT_LINUX
-		TResult<PWindow> CreateLnxX11Window(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxX11OpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxX11EGLOpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxX11MESAOpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxX11VulkanWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxWLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxWLOpenGLWindow(const WindowDesc& desc);
-		TResult<PWindow> CreateLnxWLVulkanWindow(const WindowDesc& desc);
-#endif
-
 		friend void OnMonitorChange(void* monitor, int32 event);
 
 	public:
@@ -69,7 +53,7 @@ namespace greaper::gal
 		
 		void QueryMonitors();
 
-		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
+		TResult<PWindow> CreateWindow(const WindowDesc& windowDesc)override;
 
 		void PollEvents()override;
 

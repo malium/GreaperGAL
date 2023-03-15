@@ -11,7 +11,6 @@
 #include "../GALPrerequisites.h"
 #include "../../../GreaperCore/Public/Enumeration.h"
 
-ENUMERATION(OpenGLCreationAPI, Native, EGL, OSMESA);
 ENUMERATION(OpenGLProfile, Compatibility, Core);
 ENUMERATION(OpenGLContextRobustness, NoRobustness, NoResetNotification, LooseContextOnReset);
 ENUMERATION(OpenGLReleaseBehaviour, Flush, None);

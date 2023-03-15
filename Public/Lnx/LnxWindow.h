@@ -5,27 +5,23 @@
 
 #pragma once
 
-#ifndef GAL_X11_WINDOW_H
-#define GAL_X11_WINDOW_H 1
+#ifndef GAL_LNX_WINDOW_H
+#define GAL_LNX_WINDOW_H 1
 
-#include "LnxWindow.h"
+#include "../Base/IWindow.h"
+
+ENUMERATION(DisplayProtocol, X11, Wayland);
 
 namespace greaper::gal
 {
-	struct X11WindowDesc : public LnxWindowDesc
+	struct LnxWindowDesc : public WindowDesc
 	{
 	protected:
-		DisplayProtocol_t DisplayProtocol = DisplayProtocol_t::X11;
+		DisplayProtocol_t DisplayProtocol = DisplayProtocol_t::COUNT;
 		
 	public:
-		StringView X11ClassName = ""sv;
-		StringView X11InstanceName = ""sv;
-	};
-	
-	class X11Window : public IWindow
-	{
-		
+		INLINE constexpr DisplayProtocol_t GetDisplayProtocol()const noexcept { return DisplayProtocol; }
 	};
 }
 
-#endif /* GAL_X11_WINDOW_H */
+#endif /* GAL_LNX_WINDOW_H */

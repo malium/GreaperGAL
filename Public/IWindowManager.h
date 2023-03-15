@@ -29,7 +29,7 @@ namespace greaper::gal
 		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
 		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
 
-		virtual TResult<PWindow> CreateWindow(const WindowDesc& desc) = 0;
+		virtual TResult<PWindow> CreateWindow(const WindowDesc& windowDesc) = 0;
 
 		virtual void PollEvents() = 0;
 
