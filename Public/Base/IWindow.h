@@ -40,7 +40,7 @@ namespace greaper::gal
 		RenderBackend_t Backend = RenderBackend_t::Native; // Native will create a default Window using the native OS interface, OpenGL and Vulkan needs special initialization during window creation
 		
 	public:
-		WStringView Title = L"Greaper Window"sv;
+		StringView Title = "Greaper Window"sv;
 		math::Vector2i Size = math::Vector2i(1280, 720); // The size of the window taking into account the window decoration (unless borderless or fullscreen)
 		AnchoredPosition_t Position = AnchoredPosition_t::Center; // Try to move the window to certain anchor position (some platforms don't care about the initial position set)
 		WindowMode_t Mode = WindowMode_t::Windowed;
@@ -50,7 +50,7 @@ namespace greaper::gal
 		bool StartFocused = true; // Window should start on top and with keyboard and mouse focus
 		int32 MonitorIndex = 0; // On what monitor should the window appear, <=0 selects the primary monitor
 		PTaskScheduler Scheduler = PTaskScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
-		math::Vector2i ResizingAspectRatio = math::Vector2i(0, 0); // What ratio aspec ratio scaling is allowed, (<=0,<=0) will not lock scaling
+		math::Vector2f ResizingAspectRatio = math::Vector2f(0.f, 0.f); // What ratio aspec ratio scaling is allowed, example (16,9), (<=0,<=0) will not lock scaling
 		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		PWindow ParentWindow = PWindow();
@@ -59,6 +59,7 @@ namespace greaper::gal
 		INLINE constexpr RenderBackend_t GetBackend()const noexcept { return Backend; }
 		constexpr WindowDesc()noexcept = default;
 	};
+
 
 	class IWindow
 	{
@@ -72,7 +73,7 @@ namespace greaper::gal
 
 	protected:
 		mutable RWMutex m_Mutex;
-		WString m_Title;
+		String m_Title;
 		math::Vector2i m_Size;
 		math::Vector2i m_DrawingSize;
 		math::Vector2i m_Position;
@@ -107,8 +108,8 @@ namespace greaper::gal
 		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
 		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
 
-		INLINE const WString& GetWindowTitle()const noexcept { SHAREDLOCK(m_Mutex); return m_Title; }
-		virtual void SetWindowTitle(WStringView title) = 0;
+		INLINE const String& GetWindowTitle()const noexcept { SHAREDLOCK(m_Mutex); return m_Title; }
+		virtual void SetWindowTitle(StringView title) = 0;
 
 		INLINE WindowMode_t GetWindowMode()const noexcept { SHAREDLOCK(m_Mutex); return m_Mode; }
 		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;

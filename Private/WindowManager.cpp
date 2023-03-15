@@ -274,7 +274,7 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 	switch (windowDesc.GetBackend())
 	{
 	case RenderBackend_t::Native:
-		return CreateWinNativeWindow(winDesc);
+		return CreateWinWindow(winDesc);
 	case RenderBackend_t::OpenGL:
 		return CreateWinOpenGLWindow((const WinGLWindowDesc&)winDesc);
 	case RenderBackend_t::Vulkan:

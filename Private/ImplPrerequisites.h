@@ -16,7 +16,7 @@ namespace greaper::gal
 	class WindowManager;
 
 	#if PLT_WINDOWS
-		TResult<PWindow> CreateWinNativeWindow(const WinWindowDesc& windowDesc);
+		TResult<PWindow> CreateWinWindow(const WinWindowDesc& windowDesc);
 		TResult<PWindow> CreateWinOpenGLWindow(const WinGLWindowDesc& windowDescdesc);
 		TResult<PWindow> CreateWinVulkanWindow(const WinVkWindowDesc& windowDesc);
 #elif PLT_LINUX

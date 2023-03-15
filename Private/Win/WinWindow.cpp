@@ -9,9 +9,9 @@
 using namespace greaper;
 using namespace greaper::gal;
 
-TResult<PWindow> CreateWinNativeWindow(const WindowDesc& windowDesc)
+TResult<PWindow> gal::CreateWinWindow(const WinWindowDesc& windowDesc)
 {
-	auto desc = (const WinWindowDesc&)windowDesc;
+	
 
 	return TResult<PWindow>();
 }

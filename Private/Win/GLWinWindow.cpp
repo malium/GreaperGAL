@@ -9,16 +9,8 @@
 using namespace greaper;
 using namespace greaper::gal;
 
-TResult<PWindow> greaper::gal::CreateWinNativeOpenGLWindow(const WindowDesc& windowDesc)
+TResult<PWindow> gal::CreateWinOpenGLWindow(const WinGLWindowDesc& windowDesc)
 {
-	auto desc = (const WinGLWindowDesc&)windowDesc;
-
-	return TResult<PWindow>();
-}
-
-TResult<PWindow> greaper::gal::CreateWinEGLOpenGLWindow(const WindowDesc& windowDesc)
-{
-	auto desc = (const WinGLWindowDesc&)windowDesc;
 
 	return TResult<PWindow>();
 }

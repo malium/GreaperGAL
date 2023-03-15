@@ -9,9 +9,8 @@
 using namespace greaper;
 using namespace greaper::gal;
 
-TResult<PWindow> greaper::gal::CreateWinNativeVulkanWindow(const WindowDesc& windowDesc)
+TResult<PWindow> greaper::gal::CreateWinVulkanWindow(const WinVkWindowDesc& windowDesc)
 {
-	auto desc = (const WinVkWindowDesc&)windowDesc;
 
 	return TResult<PWindow>();
 }
