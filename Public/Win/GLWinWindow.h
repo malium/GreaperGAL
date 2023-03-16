@@ -15,7 +15,7 @@
 
 namespace greaper::gal
 {
-	struct WinGLWindowDesc : public WinWindowDesc
+	struct GLWinWindowDesc : public WinWindowDesc
 	{
 	protected:
 		RenderBackend_t Backend = RenderBackend_t::OpenGL;
@@ -30,7 +30,7 @@ namespace greaper::gal
 		PWindow SharedContextWindow = PWindow();
 	};
 	
-	class WinGLWindow : public WinWindow
+	class GLWinWindow : public WinWindow
 	{
 		
 	};

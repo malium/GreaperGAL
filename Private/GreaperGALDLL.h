@@ -11,7 +11,7 @@
 #include "ImplPrerequisites.h"
 #include "../../GreaperCore/Public/IGreaperLibrary.h"
 
-#if GREAPER_GAL_DLL
+#ifdef GREAPER_GAL_DLL
 
 namespace greaper::gal
 {

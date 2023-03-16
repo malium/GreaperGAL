@@ -96,6 +96,13 @@ namespace greaper::gal
 		mutable WindowModeChangedEvent_t m_WindowModeChangedEvt;
 		mutable WindowStateChangedEvent_t m_WindowStateChangedEvt;
 
+		virtual EmptyResult Create(const WindowDesc& windowDesc)noexcept = 0;
+
+		virtual void SetDesc(const WindowDesc& windowDesc)noexcept
+		{
+
+		}
+
 	public:
 		IWindow()noexcept = default;
 		virtual ~IWindow() = default;

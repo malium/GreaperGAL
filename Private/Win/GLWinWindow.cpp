@@ -4,13 +4,14 @@
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
-#include "../../Public/Win/GLWinWindow.h"
+#include "GLWinWindow.h"
 
 using namespace greaper;
 using namespace greaper::gal;
 
-TResult<PWindow> gal::CreateWinOpenGLWindow(const WinGLWindowDesc& windowDesc)
+EmptyResult GLWinWindowImpl::Create(const WindowDesc& windowDesc) noexcept
 {
-
-	return TResult<PWindow>();
+	// We are on window thread here
+	GLWinWindowDesc desc = (const GLWinWindowDesc&)windowDesc;
+	
 }

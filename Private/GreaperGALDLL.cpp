@@ -8,7 +8,7 @@
 #include "../../GreaperCore/Public/Platform.h"
 #include "../../GreaperCore/Public/Property.h"
 
-#if GREAPER_GAL_DLL
+#ifdef GREAPER_GAL_DLL
 
 greaper::SPtr<greaper::gal::GreaperGALLibrary> gGALLibrary{};
 extern greaper::SPtr<greaper::gal::WindowManager> gWindowManager;

@@ -6,9 +6,9 @@
 #include "WindowManager.h"
 #include "GreaperGALDLL.h"
 #if PLT_WINDOWS
-#include "../Public/Win/WinWindow.h"
-#include "../Public/Win/GLWinWindow.h"
-#include "../Public/Win/VkWinWindow.h"
+#include "Win/WinWindow.h"
+#include "Win/GLWinWindow.h"
+#include "Win/VkWinWindow.h"
 #elif PLT_LINUX
 
 #endif
@@ -260,6 +260,20 @@ void WindowManager::AccessMonitors(const std::function<void(CSpan<PMonitor>)>& a
 	accessFn(CreateSpan(m_Monitors));
 }
 
+template<class TWindow>
+static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDesc)noexcept
+{
+	auto window = SPtr<TWindow>(Construct<TWindow>());
+	windowDesc.Scheduler->AddTask("CreateWindow"sv, [&output, &window, &windowDesc]()
+	{
+		EmptyResult rtn = window->Create(windowDesc);
+		if(rtn.HasFailed())
+			output = Result::CopyFailure<PWindow>(rtn);
+		else
+			output = Result::CreateSuccess((PWindow)window);
+	})
+}
+
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 {
 	auto scheduler = windowDesc.Scheduler;
@@ -269,18 +283,18 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 	if (scheduler->GetWorkerCount() != 1)
 		return Result::CreateFailure<PWindow>(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", scheduler->GetWorkerCount()));
 	
+	TResult<PWindow> output;
 #if PLT_WINDOWS
-	auto winDesc = (const WinWindowDesc&)windowDesc;
 	switch (windowDesc.GetBackend())
 	{
 	case RenderBackend_t::Native:
-		return CreateWinWindow(winDesc);
+		WindowCreation<WinWindowImpl>(output, windowDesc);
 	case RenderBackend_t::OpenGL:
-		return CreateWinOpenGLWindow((const WinGLWindowDesc&)winDesc);
+		WindowCreation<GLWinWindowImpl>(output, windowDesc);
 	case RenderBackend_t::Vulkan:
-		return CreateWinVulkanWindow((const WinVkWindowDesc&)winDesc);
+		WindowCreation<VkWinWindowImpl>(output, windowDesc);
 	default:
-		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(winDesc.GetBackend()).data()));
+		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(windowDesc.GetBackend()).data()));
 	}
 #elif PLT_LINUX
 	auto lnxDesc = (const LnxWindowDesc&)desc;
@@ -291,7 +305,7 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 		switch(lnxDesc.GetDisplayProtocol())
 		{
 		case DisplayProtocol_t::X11:
-			return CreateX11Window((const X11WindowDesc&)lnxDesc);
+
 		case DisplayProtocol_t::Wayland:
 			return CreateWLWindow((const WLWindowDesc&)lnxDesc);
 		default:
