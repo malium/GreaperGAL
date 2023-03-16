@@ -15,7 +15,8 @@ namespace greaper::gal
 {
 	struct WinWindowDesc : public WindowDesc
 	{
-		
+		bool EnableDoubleClick = true;
+		bool AlphaBlend = false;
 	};
 	
 	class WinWindow : public IWindow
