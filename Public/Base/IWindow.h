@@ -12,7 +12,7 @@
 #include "../../../GreaperMath/Public/Rect.h"
 #include "../../../GreaperCore/Public/Base/IThread.h"
 #include "../../../GreaperCore/Public/Event.h"
-#include "../../../GreaperCore/Public/MPMCTaskScheduler.h"
+//#include "../../../GreaperCore/Public/SlimTaskScheduler.h"
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
@@ -34,6 +34,7 @@ namespace greaper::gal
 		bool SRGBCapable = false;
 		bool DoubleBuffer = true;
 	};
+
 	struct WindowDesc
 	{
 	protected:
@@ -49,7 +50,7 @@ namespace greaper::gal
 		bool StartVisible = true; // Window should start visible (active on Windows), meaning that if its not active, window is running but not visible on the user desktop
 		bool StartFocused = true; // Window should start on top and with keyboard and mouse focus
 		int32 MonitorIndex = 0; // On what monitor should the window appear, <=0 selects the primary monitor
-		PTaskScheduler Scheduler = PTaskScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
+		PSlimScheduler Scheduler = PSlimScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
 		math::Vector2f ResizingAspectRatio = math::Vector2f(0.f, 0.f); // What ratio aspec ratio scaling is allowed, example (16,9), (<=0,<=0) will not lock scaling
 		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
@@ -59,7 +60,6 @@ namespace greaper::gal
 		INLINE constexpr RenderBackend_t GetBackend()const noexcept { return Backend; }
 		constexpr WindowDesc()noexcept = default;
 	};
-
 
 	class IWindow
 	{
@@ -86,8 +86,9 @@ namespace greaper::gal
 		bool m_ResizingEnabled = false;
 		bool m_HasFocus = false;
 		bool m_IsVisible = false;
+		bool m_ShouldClose = false;
 		WWindowManager m_WindowManager;
-		PTaskScheduler m_TaskScheduler;
+		PSlimScheduler m_TaskScheduler;
 		PWindow m_This;
 
 		mutable WindowClosingEvent_t m_WindowClosingEvt;
@@ -96,11 +97,46 @@ namespace greaper::gal
 		mutable WindowModeChangedEvent_t m_WindowModeChangedEvt;
 		mutable WindowStateChangedEvent_t m_WindowStateChangedEvt;
 
+		INLINE PGreaperLib GetGreaperLib()const noexcept
+		{
+			// "HACK" to get a GreaperLibrary to use it to log
+			auto wwndmgr = (const WInterface&)m_WindowManager;
+			VerifyNot(wwndmgr.expired(), "WindowManager expired!");
+			auto pwndmgr = wwndmgr.lock();
+			auto wlib = pwndmgr->GetLibrary();
+			VerifyNot(wlib.expired(), "GreaperLibrary expired!");
+			return wlib.lock();
+		}
+
 		virtual EmptyResult Create(const WindowDesc& windowDesc)noexcept = 0;
 
-		virtual void SetDesc(const WindowDesc& windowDesc)noexcept
+		virtual void VerifyDesc(WindowDesc& windowDesc)const noexcept
 		{
+			auto plib = GetGreaperLib();
+			if(windowDesc.Size.X < 0 || windowDesc.Size.Y < 0)
+			{
+				plib->LogVerbose(Format("Verifying a WindwoDesc, Size has invalid values (%i, %i), changing them to (1280, 720).", windowDesc.Size.X, windowDesc.Size.Y));
+				windowDesc.Size.X = 1280;
+				windowDesc.Size.Y = 720;
+			}
+			
+			if(windowDesc.Position == AnchoredPosition_t::COUNT)
+			{
+				plib->LogVerbose(Format("Verifying a WindowDesc, Position is invalid '%s', changing it to Center.", TEnum<AnchoredPosition_t>::ToString(windowDesc.Position).data()));
+				windowDesc.Position = AnchoredPosition_t::Center;
+			}
+			
+			if(windowDesc.Mode == WindowMode_t::COUNT)
+			{
+				plib->LogVerbose(Format("Verifying a WindowDesc, Mode is invalid '%s', changing it to Windowed.", TEnum<WindowMode_t>::ToString(windowDesc.Mode).data()));
+				windowDesc.Mode = WindowMode_t::Windowed;
+			}
 
+			if(windowDesc.State == WindowState_t::COUNT)
+			{
+				plib->LogVerbose(Format("Verifying a WindowDesc, State is invalid '%s', changing it to Normal.", TEnum<WindowState_t>::ToString(windowDesc.State).data()));
+				windowDesc.State = WindowState_t::Normal;
+			}
 		}
 
 	public:
@@ -154,11 +190,14 @@ namespace greaper::gal
 
 		virtual void SwapWindow() = 0;
 
+		INLINE bool ShouldClose()const noexcept { SHAREDLOCK(m_Mutex); return m_ShouldClose; }
+		virtual void CloseWindow() = 0;
+
 		virtual RenderBackend_t GetRenderBackend()const = 0;
 
 		INLINE WWindowManager GetWindowManager()const noexcept { return m_WindowManager; }
 
-		INLINE PTaskScheduler GetTaskScheduler()const noexcept { return m_TaskScheduler; }
+		INLINE PSlimScheduler GetTaskScheduler()const noexcept { return m_TaskScheduler; }
 
 		INLINE WindowClosingEvent_t& GetClosingEvent()const noexcept { return m_WindowClosingEvt; }
 		INLINE WindowMovedEvent_t& GetMovedEvent()const noexcept { return m_WindowMovedEvt; }
