@@ -543,7 +543,7 @@ def write_function_struct(tabs, file, header):
 
 def write_procnamelist(tabs:str, file, header):
 	functions = procs[header]
-	file.write(('%sstatic constexpr const char* ProcList[%d] = {\n'%(tabs, len(functions))).encode('utf-8'))
+	file.write(('%sstatic constexpr const char* ProcNameList[%d] = {\n'%(tabs, len(functions))).encode('utf-8'))
 	for proc in functions:
 		file.write(('%s\t"%s",\n'%(tabs, proc_to_name(proc, header))).encode('utf-8'))
 	file.write(('%s};\n'%(tabs)).encode('utf-8'))

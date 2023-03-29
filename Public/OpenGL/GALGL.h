@@ -4746,7 +4746,7 @@ union GL
 
 	GLproc ProcList[1278];
 
-	static constexpr const char* ProcList[1278] = {
+	static constexpr const char* ProcNameList[1278] = {
 		"glCullFace",
 		"glFrontFace",
 		"glHint",

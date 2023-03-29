@@ -5,6 +5,7 @@
 
 #include "WindowManager.h"
 #include "GreaperGALDLL.h"
+#include "../../GreaperCore/Public/SlimTaskScheduler.h"
 #if PLT_WINDOWS
 #include "Win/WinWindow.h"
 #include "Win/GLWinWindow.h"
@@ -264,37 +265,37 @@ template<class TWindow>
 static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDesc)noexcept
 {
 	auto window = SPtr<TWindow>(Construct<TWindow>());
-	windowDesc.Scheduler->AddTask("CreateWindow"sv, [&output, &window, &windowDesc]()
-	{
-		EmptyResult rtn = window->Create(windowDesc);
-		if(rtn.HasFailed())
-			output = Result::CopyFailure<PWindow>(rtn);
-		else
-			output = Result::CreateSuccess((PWindow)window);
-	})
+	windowDesc.Scheduler->AddTask((SlimTask)[&output, &window, &windowDesc]()
+		{
+			EmptyResult rtn = window->Create(windowDesc);
+			if (rtn.HasFailed())
+				output = Result::CopyFailure<PWindow>(rtn);
+			else
+				output = Result::CreateSuccess((PWindow)window);
+		});
 }
 
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 {
-	auto scheduler = windowDesc.Scheduler;
-	if(scheduler == nullptr)
-		scheduler = MPMCTaskScheduler::Create(m_ThreadManager, "GreaperWindow TaskScheduler"sv, 1, false);
+	WindowDesc desc = windowDesc;
+	if(desc.Scheduler == nullptr)
+		desc.Scheduler = SlimTaskScheduler::Create(m_ThreadManager, "GreaperWindow TaskScheduler"sv, 1, false);
 	
-	if (scheduler->GetWorkerCount() != 1)
-		return Result::CreateFailure<PWindow>(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", scheduler->GetWorkerCount()));
+	if (desc.Scheduler->GetWorkerCount() != 1)
+		return Result::CreateFailure<PWindow>(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", desc.Scheduler->GetWorkerCount()));
 	
 	TResult<PWindow> output;
 #if PLT_WINDOWS
-	switch (windowDesc.GetBackend())
+	switch (desc.GetBackend())
 	{
 	case RenderBackend_t::Native:
-		WindowCreation<WinWindowImpl>(output, windowDesc);
+		WindowCreation<WinWindowImpl>(output, desc);
 	case RenderBackend_t::OpenGL:
-		WindowCreation<GLWinWindowImpl>(output, windowDesc);
+		WindowCreation<GLWinWindowImpl>(output, desc);
 	case RenderBackend_t::Vulkan:
-		WindowCreation<VkWinWindowImpl>(output, windowDesc);
+		WindowCreation<VkWinWindowImpl>(output, desc);
 	default:
-		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(windowDesc.GetBackend()).data()));
+		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(desc.GetBackend()).data()));
 	}
 #elif PLT_LINUX
 	auto lnxDesc = (const LnxWindowDesc&)desc;

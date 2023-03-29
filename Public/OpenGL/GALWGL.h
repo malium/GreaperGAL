@@ -635,7 +635,7 @@ union WGL
 
 	WGLproc ProcList[145];
 
-	static constexpr const char* ProcList[145] = {
+	static constexpr const char* ProcNameList[145] = {
 		"ChoosePixelFormat",
 		"DescribePixelFormat",
 		"GetEnhMetaFilePixelFormat",
