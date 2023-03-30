@@ -290,10 +290,13 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 	{
 	case RenderBackend_t::Native:
 		WindowCreation<WinWindowImpl>(output, desc);
+		break;
 	case RenderBackend_t::OpenGL:
 		WindowCreation<GLWinWindowImpl>(output, desc);
+		break;
 	case RenderBackend_t::Vulkan:
 		WindowCreation<VkWinWindowImpl>(output, desc);
+		break;
 	default:
 		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(desc.GetBackend()).data()));
 	}
@@ -341,7 +344,16 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 		return Result::CreateFailure<PWindow>(Format("Trying to create a Linux window but the given backend %s is not implemented or supported.", TEnum<RenderBackend_t>::ToString(lnxDesc.GetBackend()).data()));
 	}
 #endif
-	return Result::CreateFailure<PWindow>("Platform not implemented"sv);
+
+	if (output.HasFailed())
+		return output;
+
+	{
+		LOCK(m_WindowMutex);
+		m_Windows.push_back(output.GetValue());
+	}
+
+	return output;
 }
 
 void WindowManager::PollEvents()

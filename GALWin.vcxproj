@@ -242,6 +242,9 @@
     <ClInclude Include="Private\GreaperGALDLL.h" />
     <ClInclude Include="Private\ImplPrerequisites.h" />
     <ClInclude Include="Private\WindowManager.h" />
+    <ClInclude Include="Private\Win\GLWinWindow.h" />
+    <ClInclude Include="Private\Win\VkWinWindow.h" />
+    <ClInclude Include="Private\Win\WinWindow.h" />
     <ClInclude Include="Public\Base\DisplayAdapter.h" />
     <ClInclude Include="Public\Base\IWindow.h" />
     <ClInclude Include="Public\Base\Monitor.h" />
@@ -250,6 +253,7 @@
     <ClInclude Include="Public\IWindowManager.h" />
     <ClInclude Include="Public\Lnx\GLWLWindow.h" />
     <ClInclude Include="Public\Lnx\GLX11Window.h" />
+    <ClInclude Include="Public\Lnx\LnxWindow.h" />
     <ClInclude Include="Public\Lnx\VkWLWindow.h" />
     <ClInclude Include="Public\Lnx\VkX11Window.h" />
     <ClInclude Include="Public\Lnx\WLWindow.h" />
@@ -265,6 +269,9 @@
   <ItemGroup>
     <ClCompile Include="Private\GreaperGALDLL.cpp" />
     <ClCompile Include="Private\WindowManager.cpp" />
+    <ClCompile Include="Private\Win\GLWinWindow.cpp" />
+    <ClCompile Include="Private\Win\VkWinWindow.cpp" />
+    <ClCompile Include="Private\Win\WinWindow.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

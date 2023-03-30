@@ -19,6 +19,7 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 {
 	// We are on window thread here
 	WinWindowDesc desc = (const WinWindowDesc&)windowDesc;
+	return Result::CreateFailure("Not implemented"sv);
 
 	m_Mutex.lock(); // we don't want any modification except ours
 
@@ -62,4 +63,101 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 		m_StyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 	}
 	}
+}
+
+EmptyResult greaper::gal::WinWindowImpl::ChangeWindowSize(math::Vector2i size)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(math::Vector2i size)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(AnchoredPosition_t anchor)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+void greaper::gal::WinWindowImpl::SetWindowTitle(StringView title)
+{
+	Break("Not implemented.");
+}
+
+EmptyResult greaper::gal::WinWindowImpl::ChangeWindowMode(WindowMode_t mode)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::ChangeWindowState(WindowState_t state)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+void greaper::gal::WinWindowImpl::ShowWindow()
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::HideWindow()
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::RequestFocus()
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::EnableResizing(bool enable)
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::SetMinWindowSize(math::Vector2i minSize, bool changeCurrent)
+{
+	Break("Not implemented.");
+}
+
+String greaper::gal::WinWindowImpl::GetClipboardText() const
+{
+	Break("Not implemented.");
+	return String();
+}
+
+EmptyResult greaper::gal::WinWindowImpl::SetClipboardText(StringView text)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+bool greaper::gal::WinWindowImpl::HasClipboardText()
+{
+	Break("Not implemented.");
+	return false;
+}
+
+void greaper::gal::WinWindowImpl::SwapWindow()
+{
+	Break("Not implemented.");
+}
+
+void greaper::gal::WinWindowImpl::CloseWindow()
+{
+	Break("Not implemented.");
+}
+
+RenderBackend_t greaper::gal::WinWindowImpl::GetRenderBackend() const
+{
+	return RenderBackend_t::Native;
 }
