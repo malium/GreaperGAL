@@ -14,6 +14,8 @@ namespace greaper::gal
 {
 	class GreaperGALLibrary;
 	class WindowManager;
+
+	void UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMonitorIdx);
 }
 
 #endif /* GAL_IMPL_PREREQUISITES_H */

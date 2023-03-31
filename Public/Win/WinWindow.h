@@ -9,7 +9,7 @@
 #define GAL_WIN_WINDOW_H 1
 
 #include "../Base/IWindow.h"
-#include "../../../GreaperCore/Public/Win/Win32Base.h"
+#include "../../../GreaperCore/Public/Win/Win32User.h"
 
 namespace greaper::gal
 {
@@ -25,6 +25,7 @@ namespace greaper::gal
 		using MessageFn = std::function<LRESULT(WinWindow* window, WPARAM wParam, LPARAM lParam)>;
 	protected:
 		HWND m_WindowHandle;
+		HDC m_DC;
 		DWORD m_Style;
 		DWORD m_StyleEx;
 		DWORD m_LastMessageID;
@@ -55,6 +56,8 @@ namespace greaper::gal
 
 	public:
 		INLINE HWND GetOSHandle()const noexcept { SHAREDLOCK(m_Mutex); return m_WindowHandle; }
+
+		INLINE HDC GetDC()const noexcept { SHAREDLOCK(m_Mutex); return m_DC; }
 		
 		INLINE DWORD GetCurrentStyle()const noexcept { SHAREDLOCK(m_Mutex); return m_Style; }
 		
@@ -73,6 +76,17 @@ namespace greaper::gal
 		}
 
 		INLINE DWORD GetLastMessageID()const noexcept { SHAREDLOCK(m_Mutex); return m_LastMessageID; }
+
+		INLINE void PollEvents() override
+		{
+			MSG msg;
+			while (PeekMessageW(&msg, m_WindowHandle, 0, 0, PM_REMOVE) != 0)
+			{
+				TranslateMessage(&msg);
+
+				DispatchMessageW(&msg);
+			}
+		}
 	};
 }
 

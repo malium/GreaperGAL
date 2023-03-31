@@ -188,6 +188,7 @@ namespace greaper::gal
 		virtual EmptyResult SetClipboardText(StringView text) = 0;
 		virtual bool HasClipboardText() = 0;
 
+		virtual void PollEvents() = 0;
 		virtual void SwapWindow() = 0;
 
 		INLINE bool ShouldClose()const noexcept { SHAREDLOCK(m_Mutex); return m_ShouldClose; }

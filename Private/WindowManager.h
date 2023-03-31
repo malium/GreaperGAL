@@ -55,8 +55,6 @@ namespace greaper::gal
 
 		TResult<PWindow> CreateWindow(const WindowDesc& windowDesc)override;
 
-		void PollEvents()override;
-
 		PMonitor GetMainMonitor() const override;
 		
 		void AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const override;
