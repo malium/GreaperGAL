@@ -14,6 +14,19 @@
 
 namespace greaper::gal
 {
+	struct MonitorConfig
+	{
+		math::RectI SizeRect;
+		math::RectI WorkRect;
+		int32 Index;
+		String Name;
+		Vector<PVideoMode> VideoModes;
+		sizet MainVideoMode;
+		float DiagonalDPI;
+		float HorizontalDPI;
+		float VerticalDPI;
+	};
+
 	class Monitor
 	{
 		math::RectI m_SizeRect;
@@ -28,11 +41,12 @@ namespace greaper::gal
 
 	public:
 		Monitor()noexcept = default;
-		Monitor(math::RectI sizeRect, math::RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi)noexcept;
 		Monitor(const Monitor&) = default;
 		Monitor(Monitor&&)noexcept = default;
 		Monitor& operator=(const Monitor&) = default;
 		Monitor& operator=(Monitor&&)noexcept = default;
+
+		void SetConfig(const MonitorConfig& config)noexcept;
 
 		INLINE const math::RectI& GetSizeRect()const noexcept { return m_SizeRect; }
 
@@ -55,18 +69,17 @@ namespace greaper::gal
 		INLINE PVideoMode GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
 	};
 
-	INLINE Monitor::Monitor(math::RectI sizeRect, math::RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi) noexcept
-		:m_SizeRect(std::move(sizeRect))
-		,m_WorkRect(std::move(workRect))
-		,m_Index(index)
-		,m_Name(std::move(name))
-		,m_VideoModes(std::move(videoModes))
-		,m_MainVideoMode(mainVideoMode)
-		,m_DiagonalDPI(ddpi)
-		,m_HorizontalDPI(hdpi)
-		,m_VerticalDPI(vdpi)
+	INLINE void Monitor::SetConfig(const MonitorConfig& config)noexcept
 	{
-
+		m_SizeRect = config.SizeRect;
+		m_WorkRect = config.WorkRect;
+		m_Index = config.Index;
+		m_Name = config.Name;
+		m_VideoModes = config.VideoModes;
+		m_MainVideoMode = config.MainVideoMode;
+		m_DiagonalDPI = config.DiagonalDPI;
+		m_HorizontalDPI = config.HorizontalDPI;
+		m_VerticalDPI = config.VerticalDPI;
 	}
 }
 

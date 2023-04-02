@@ -13,6 +13,14 @@
 
 namespace greaper::gal
 {
+	struct VideoModeConfig
+	{
+		WMonitor ParentMonitor;
+		math::Vector2i Resolution;
+		uint16 Frequency;
+		uint8 PixelDepth;
+	};
+
 	class VideoMode
 	{
 		WMonitor m_Monitor;
@@ -22,11 +30,12 @@ namespace greaper::gal
 
 	public:
 		constexpr VideoMode()noexcept = default;
-		VideoMode(math::Vector2i resolution, WMonitor monitor, uint16 frequency, uint8 pixelDepth)noexcept;
 		VideoMode(const VideoMode&) = default;
 		VideoMode(VideoMode&&)noexcept = default;
 		VideoMode& operator=(const VideoMode&) = default;
 		VideoMode& operator=(VideoMode&&)noexcept = default;
+
+		void SetConfig(const VideoModeConfig& config)noexcept;
 
 		INLINE constexpr const math::Vector2i& GetResolution()const noexcept { return m_Resolution; }
 
@@ -37,13 +46,12 @@ namespace greaper::gal
 		INLINE constexpr uint8 GetPixelDepth()const noexcept { return m_PixelDepth; }
 	};
 
-	INLINE VideoMode::VideoMode(math::Vector2i resolution, WMonitor monitor, uint16 frequency, uint8 pixelDepth) noexcept
-		:m_Resolution(std::move(resolution))
-		,m_Monitor(std::move(monitor))
-		,m_Frequency(frequency)
-		,m_PixelDepth(pixelDepth)
+	INLINE void VideoMode::SetConfig(const VideoModeConfig& config)noexcept
 	{
-
+		m_Monitor = config.ParentMonitor;
+		m_Resolution = config.Resolution;
+		m_Frequency = config.Frequency;
+		m_PixelDepth = config.PixelDepth;
 	}
 }
 
