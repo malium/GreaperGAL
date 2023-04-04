@@ -10,12 +10,17 @@
 #include "Win/WinWindow.h"
 #include "Win/GLWinWindow.h"
 #include "Win/VkWinWindow.h"
+#include "../../GreaperCore/Public/Win/Win32ShellScalingAPI.h"
 #elif PLT_LINUX
 
 #endif
 
 using namespace greaper;
 using namespace greaper::gal;
+
+#if PLT_WINDOWS
+extern EmptyResult EnableDPI();
+#endif
 
 SPtr<WindowManager> gWindowManager = {};
 extern SPtr<GreaperGALLibrary> gGALLibrary;
@@ -33,13 +38,7 @@ void greaper::gal::WindowManager::OnNewManager(const PInterface& newInterface) n
 void WindowManager::OnInitialization() noexcept
 {
 #if PLT_WINDOWS
-#if(WINVER >= 0x0605) // Windows 10 1607
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-#elif(WINVER >= NTDDI_WINBLUE) // Windows 8.1
-	SetProcessDpiAwareness
-
-#endif
-	SetProcessDPIAware();
+	EnableDPI();
 #endif
 }
 
@@ -104,12 +103,33 @@ void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
 
 void WindowManager::InitProperties() noexcept
 {
+	if (m_Library.expired())
+		return; // no base library weird
 
+	auto lib = m_Library.lock();
+
+	if (m_Properties.size() != (sizet)COUNT)
+		m_Properties.resize((sizet)COUNT, WIProperty());
+
+	WPtr<Win32DPIScalingProp_t> win32DPIScalingProp;
+	auto result = lib->GetProperty(Win32DPIScalingName);
+	if (result.IsOk())
+		win32DPIScalingProp = result.GetValue();
+	
+	if (win32DPIScalingProp.expired())
+	{
+		auto win32DPIScalingResult = CreateProperty<Win32DPIScaling_t>(m_Library, Win32DPIScalingName,
+			Win32DPIScaling_t::MONITOR_AWARE_V2, "On Windows systems tells which way of DPI scaling should try to use."sv, false, false, {});
+		Verify(win32DPIScalingResult.IsOk(), "Couldn't create the property '%s' msg: %s", Win32DPIScalingName.data(), win32DPIScalingResult.GetFailMessage().c_str());
+		win32DPIScalingProp = (WPtr<Win32DPIScalingProp_t>)win32DPIScalingResult.GetValue();
+	}
+	m_Properties[(std::size_t)Win32DPIScaling] = win32DPIScalingProp;
 }
 
 void WindowManager::DeinitProperties() noexcept
 {
-
+	for (auto& prop : m_Properties)
+		prop.reset();
 }
 
 void WindowManager::QueryMonitors()

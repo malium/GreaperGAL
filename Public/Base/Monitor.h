@@ -11,6 +11,9 @@
 #include "../GALPrerequisites.h"
 #include "../../../GreaperMath/Public/Rect.h"
 #include "VideoMode.h"
+#include "../../../GreaperCore/Public/Enumeration.h"
+
+ENUMERATION(Win32DPIScaling, UNAWARE, SYSTEM_AWARE, MONITOR_AWARE, MONITOR_AWARE_V2, UNAWARE_GDISCALING);
 
 namespace greaper::gal
 {

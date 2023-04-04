@@ -271,7 +271,8 @@
     <ClCompile Include="Private\WindowManager.cpp" />
     <ClCompile Include="Private\Win\GLWinWindow.cpp" />
     <ClCompile Include="Private\Win\VkWinWindow.cpp" />
-    <ClCompile Include="Private\Win\WinMonitorQuery.cpp" />
+    <ClCompile Include="Private\Win\WinDPI.cpp" />
+    <ClCompile Include="Private\Win\WinMonitor.cpp" />
     <ClCompile Include="Private\Win\WinWindow.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

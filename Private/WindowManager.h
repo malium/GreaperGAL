@@ -17,6 +17,13 @@ namespace greaper::gal
 {
 	class WindowManager final : public IWindowManager
 	{
+		enum PropertiesIndices
+		{
+			Win32DPIScaling,
+
+			COUNT
+		};
+
 		mutable RWMutex m_MonitorMutex;
 		Vector<PMonitor> m_Monitors;
 		sizet m_MainMonitor;
@@ -32,8 +39,6 @@ namespace greaper::gal
 		void OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface)noexcept;
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
 		void OnNewManager(const PInterface& newInterface)noexcept;
-
-		friend void OnMonitorChange(void* monitor, int32 event);
 
 	public:
 		WindowManager()noexcept = default;
@@ -60,6 +65,8 @@ namespace greaper::gal
 		void AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const override;
 
 		void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const override;
+
+		WPtr<Win32DPIScalingProp_t> GetWin32DPIScaling()const noexcept override { return (WPtr<Win32DPIScalingProp_t>)m_Properties[(std::size_t)Win32DPIScaling]; }
 	};
 }
 

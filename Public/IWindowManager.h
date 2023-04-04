@@ -21,6 +21,9 @@ namespace greaper::gal
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xC47AC974, 0x86A811ED, 0xA1EB0242, 0xAC120002 };
 		static constexpr StringView InterfaceName = "WindowManager"sv;
 
+		static constexpr StringView Win32DPIScalingName = "Win32DPIScaling"sv;
+		using Win32DPIScalingProp_t = TProperty<Win32DPIScaling_t>;
+
 		// These events are triggered by all windows, if you want a single window event trigger, you must connect with the events triggered by the window itself
 		using WindowCreationEvent_t = Event<const PWindow&>;
 		using WindowDestructionEvent_t = Event<const PWindow&>;
@@ -41,6 +44,8 @@ namespace greaper::gal
 		virtual void AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn)const = 0;
 
 		virtual void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn)const = 0;
+
+		virtual WPtr<Win32DPIScalingProp_t> GetWin32DPIScaling()const noexcept = 0;
 	};
 }
 

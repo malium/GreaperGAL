@@ -35,7 +35,7 @@ struct AdapterInfo
 	Vector<VideoModeConfig> VideoModes;
 };
 
-BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRect, LPARAM lParam)
+static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRect, LPARAM lParam)
 {
 	auto* davPtr = reinterpret_cast<Vector<AdapterInfo>*>((void*)lParam);
 	if (!davPtr)
@@ -61,7 +61,7 @@ BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRe
 	for (const auto& adapter : dav)
 	{
 		const auto& monitors = adapter.Monitors;
-		sizet j = 0;
+		j = 0;
 		for (const auto& monitor : monitors)
 		{
 			if (wcsncmp(monInfo.szDevice, monitor.DeviceName, ArraySize(monitor.DeviceName)) == 0)
@@ -80,7 +80,7 @@ BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRe
 	}
 	if (adapterIdx < 0 || monitorIdx < 0)
 	{
-		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, the given monitor '%s' was not found.", monInfo.szDevice));
+		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, the given monitor '%S' was not found.", monInfo.szDevice));
 		return true;
 	}
 
@@ -175,6 +175,10 @@ static void QueryVideoModesFromAdapter(AdapterInfo& adapterInfo)noexcept
 
 			adapterInfo.VideoModes.push_back(std::move(config));
 		}
+		else
+		{
+			break;
+		}
 	}
 }
 
@@ -204,7 +208,7 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 			break;
 		}
 	}
-	if (!EnumDisplayMonitors(nullptr, nullptr, &MonitorQuery, (LPARAM)((void*)&adapters)))
+	if (!EnumDisplayMonitors(nullptr, nullptr, &::MonitorQuery, (LPARAM)((void*)&adapters)))
 	{
 
 	}
