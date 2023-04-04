@@ -7,13 +7,17 @@
 #include "../../Public/Base/Monitor.h"
 #include "../../../GreaperCore/Public/Win/Win32User.h"
 #include "../../../GreaperCore/Public/Win/Win32GDI.h"
+#include "../GreaperGALDLL.h"
 
 using namespace greaper;
 using namespace greaper::gal;
 
+extern SPtr<GreaperGALLibrary> gGALLibrary;
+
 struct MonitorInfo
 {
 	WCHAR DeviceName[32];
+	HMONITOR Handle;
 	bool Primary;
 	math::Vector2i Resolution;
 	math::Vector2i WorkArea;
@@ -36,7 +40,7 @@ BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRe
 	auto* davPtr = reinterpret_cast<Vector<AdapterInfo>*>((void*)lParam);
 	if (!davPtr)
 	{
-
+		gGALLibrary->LogError(String{ "Trying to retrieve the monitor info, but the Vector of AdapterInfo was not received."sv });
 		return true;
 	}
 	auto& dav = *davPtr;
@@ -46,15 +50,81 @@ BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRe
 	monInfo.cbSize = sizeof(monInfo);
 	if (!GetMonitorInfoW(hMonitor, &monInfo))
 	{
-
+		const auto err = GetLastError();
+		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, but something went wrong, error: " I32_HEX_FMT ".", err));
 		return true;
 	}
 	ssizet adapterIdx = -1;
 	ssizet monitorIdx = -1;
-	for (const auto& adapters : dav)
+
+	sizet i = 0, j = 0;
+	for (const auto& adapter : dav)
 	{
+		const auto& monitors = adapter.Monitors;
+		sizet j = 0;
+		for (const auto& monitor : monitors)
+		{
+			if (wcsncmp(monInfo.szDevice, monitor.DeviceName, ArraySize(monitor.DeviceName)) == 0)
+			{
+				adapterIdx = i;
+				monitorIdx = j;
+				break;
+			}
+			++j;
+		}
 		
+		if (adapterIdx >= 0 && monitorIdx >= 0)
+			break;
+
+		++i;
 	}
+	if (adapterIdx < 0 || monitorIdx < 0)
+	{
+		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, the given monitor '%s' was not found.", monInfo.szDevice));
+		return true;
+	}
+
+	auto& monitorInfo = dav[adapterIdx].Monitors[monitorIdx];
+	monitorInfo.Primary = (monInfo.dwFlags & MONITORINFOF_PRIMARY) > 0;
+	const math::Vector2i distanceTo00 = { -monInfo.rcMonitor.left, -monInfo.rcMonitor.top };
+
+	monitorInfo.Resolution.Set(
+		((monInfo.rcMonitor.right - monInfo.rcMonitor.left) + distanceTo00.X),
+		((monInfo.rcMonitor.bottom - monInfo.rcMonitor.top) + distanceTo00.Y)
+	);
+
+	monitorInfo.WorkArea.Set(
+		((monInfo.rcWork.right - monInfo.rcWork.left) + distanceTo00.X),
+		((monInfo.rcWork.bottom - monInfo.rcWork.top) + distanceTo00.Y)
+	);
+
+	monitorInfo.Handle = hMonitor;
+
+	// DPI 
+	switch (OSPlatform::GetWindowsVersion())
+	{
+	case WindowsVersion_t::Windows7:
+	case WindowsVersion_t::Windows8:
+	// Get System DPI
+	{
+		HDC hDCScreen = GetDC(nullptr);
+		const auto dpix = GetDeviceCaps(hDCScreen, LOGPIXELSX);
+		const auto dpiy = GetDeviceCaps(hDCScreen, LOGPIXELSY);
+		monitorInfo.HDPI = dpix / (float)USER_DEFAULT_SCREEN_DPI;
+		monitorInfo.VDPI = dpiy / (float)USER_DEFAULT_SCREEN_DPI;
+		ReleaseDC(nullptr, hDCScreen);
+	}
+		break;
+	case WindowsVersion_t::Windows81:
+	case WindowsVersion_t::Windows10:
+
+		break;
+	default:
+
+		break;
+	}
+
+	return true;
 }
 
 static void QueryMonitorsFromAdapter(AdapterInfo& adapterInfo)noexcept
@@ -123,7 +193,7 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 			adapter.Active = dispDev.StateFlags & DISPLAY_DEVICE_ACTIVE;
 			adapter.Default = dispDev.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE;
 			
-			memcpy(adapter.DeviceName, dispDev.DeviceName, ArraySize(dispDev.DeviceName) * sizeof(*adapter.DeviceName));
+			wmemcpy(adapter.DeviceName, dispDev.DeviceName, ArraySize(dispDev.DeviceName));
 
 			QueryMonitorsFromAdapter(adapter);
 			QueryVideoModesFromAdapter(adapter);

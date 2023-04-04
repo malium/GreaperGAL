@@ -32,7 +32,15 @@ void greaper::gal::WindowManager::OnNewManager(const PInterface& newInterface) n
 
 void WindowManager::OnInitialization() noexcept
 {
-	
+#if PLT_WINDOWS
+#if(WINVER >= 0x0605) // Windows 10 1607
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+#elif(WINVER >= NTDDI_WINBLUE) // Windows 8.1
+	SetProcessDpiAwareness
+
+#endif
+	SetProcessDPIAware();
+#endif
 }
 
 void WindowManager::OnDeinitialization() noexcept
