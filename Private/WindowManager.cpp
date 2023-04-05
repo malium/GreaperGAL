@@ -37,9 +37,7 @@ void greaper::gal::WindowManager::OnNewManager(const PInterface& newInterface) n
 
 void WindowManager::OnInitialization() noexcept
 {
-#if PLT_WINDOWS
-	EnableDPI();
-#endif
+
 }
 
 void WindowManager::OnDeinitialization() noexcept
@@ -89,16 +87,18 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	}
 	else
 	{
+#if PLT_WINDOWS
+		auto enableDPIRes = EnableDPI();
+		if (enableDPIRes.HasFailed())
+			gGALLibrary->LogWarning(enableDPIRes.GetFailMessage());
+#endif
 		QueryMonitors();
 	}
-	//glfwSetMonitorCallback(&OnMonitorChange);
 }
 
 void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
 {
 	m_Monitors.clear();
-	//if (newDefault == nullptr) // If there's no new WindowManager disconnect callback
-		//glfwSetMonitorCallback(nullptr);
 }
 
 void WindowManager::InitProperties() noexcept

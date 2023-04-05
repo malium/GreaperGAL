@@ -19,7 +19,7 @@ namespace greaper::gal
 	{
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{ 0x5DECEE34, 0x86A911ED, 0xA1EB0242, 0xAC120002 };
-		static constexpr StringView LibraryName = "GreaperDisplay"sv;
+		static constexpr StringView LibraryName = "GreaperGAL"sv;
 
 		GreaperGALLibrary() = default;
 
