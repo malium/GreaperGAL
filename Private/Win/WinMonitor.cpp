@@ -20,7 +20,7 @@ struct MonitorInfo
 	HMONITOR Handle;
 	bool Primary;
 	math::Vector2i Resolution;
-	math::Vector2i WorkArea;
+	math::RectI WorkArea;
 	float HDPI;
 	float VDPI;
 	float DDPI;
@@ -93,10 +93,10 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 		((monInfo.rcMonitor.bottom - monInfo.rcMonitor.top) + distanceTo00.Y)
 	);
 
-	monitorInfo.WorkArea.Set(
-		((monInfo.rcWork.right - monInfo.rcWork.left) + distanceTo00.X),
-		((monInfo.rcWork.bottom - monInfo.rcWork.top) + distanceTo00.Y)
-	);
+	monitorInfo.WorkArea.Set(monInfo.rcWork);
+	//	((monInfo.rcWork.right - monInfo.rcWork.left) + distanceTo00.X),
+	//	((monInfo.rcWork.bottom - monInfo.rcWork.top) + distanceTo00.Y)
+	//);
 
 	monitorInfo.Handle = hMonitor;
 
