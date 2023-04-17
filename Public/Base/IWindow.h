@@ -9,9 +9,9 @@
 #define GAL_I_WINDOW_H 1
 
 #include "../GALPrerequisites.h"
-#include "../../../GreaperMath/Public/Rect.h"
 #include "../../../GreaperCore/Public/Base/IThread.h"
 #include "../../../GreaperCore/Public/Event.h"
+#include "../../../GreaperMath/Public/Vector2.h"
 //#include "../../../GreaperCore/Public/SlimTaskScheduler.h"
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
@@ -100,10 +100,10 @@ namespace greaper::gal
 		INLINE PGreaperLib GetGreaperLib()const noexcept
 		{
 			// "HACK" to get a GreaperLibrary to use it to log
-			auto wwndmgr = (const WInterface&)m_WindowManager;
+			const auto& wwndmgr = (const WInterface&)m_WindowManager;
 			VerifyNot(wwndmgr.expired(), "WindowManager expired!");
 			auto pwndmgr = wwndmgr.lock();
-			auto wlib = pwndmgr->GetLibrary();
+			const auto& wlib = pwndmgr->GetLibrary();
 			VerifyNot(wlib.expired(), "GreaperLibrary expired!");
 			return wlib.lock();
 		}

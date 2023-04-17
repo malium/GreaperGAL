@@ -17,22 +17,28 @@ extern SPtr<GreaperGALLibrary> gGALLibrary;
 struct MonitorInfo
 {
 	WCHAR DeviceName[32];
-	HMONITOR Handle;
-	bool Primary;
-	math::Vector2i Resolution;
-	math::RectI WorkArea;
-	float HDPI;
-	float VDPI;
-	float DDPI;
+	WCHAR DeviceString[128];
+	WCHAR DeviceID[128];
+	WCHAR DeviceKey[128];
+	HMONITOR Handle = (HMONITOR)INVALID_HANDLE_VALUE;
+	bool Primary = false;
+	math::Vector2i Resolution{};
+	math::RectI WorkArea{};
+	float HDPI{};
+	float VDPI{};
+	float DDPI{};
 };
 
 struct AdapterInfo
 {
-	bool Active;
-	bool Default;
+	bool Active{};
+	bool Default{};
 	WCHAR DeviceName[32];
-	Vector<MonitorInfo> Monitors;
-	Vector<VideoModeConfig> VideoModes;
+	WCHAR DeviceString[128];
+	WCHAR DeviceID[128];
+	WCHAR DeviceKey[128];
+	Vector<MonitorInfo> Monitors{};
+	Vector<VideoModeConfig> VideoModes{};
 };
 
 static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRect, LPARAM lParam)
@@ -138,6 +144,9 @@ static void QueryMonitorsFromAdapter(AdapterInfo& adapterInfo)noexcept
 		{
 			MonitorInfo info;
 			wmemcpy(info.DeviceName, monDev.DeviceName, ArraySize(monDev.DeviceName));
+			wmemcpy(info.DeviceString, monDev.DeviceString, ArraySize(monDev.DeviceString));
+			wmemcpy(info.DeviceKey, monDev.DeviceKey, ArraySize(monDev.DeviceKey));
+			wmemcpy(info.DeviceID, monDev.DeviceID, ArraySize(monDev.DeviceID));
 			adapterInfo.Monitors.push_back(std::move(info));
 		}
 		else
@@ -198,9 +207,18 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 			adapter.Default = dispDev.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE;
 			
 			wmemcpy(adapter.DeviceName, dispDev.DeviceName, ArraySize(dispDev.DeviceName));
+			wmemcpy(adapter.DeviceString, dispDev.DeviceString, ArraySize(dispDev.DeviceString));
+			wmemcpy(adapter.DeviceKey, dispDev.DeviceKey, ArraySize(dispDev.DeviceKey));
+			wmemcpy(adapter.DeviceID, dispDev.DeviceID, ArraySize(dispDev.DeviceID));
 
 			QueryMonitorsFromAdapter(adapter);
+			if (adapter.Monitors.empty())
+				continue;
+
 			QueryVideoModesFromAdapter(adapter);
+			if (adapter.VideoModes.empty())
+				continue;
+
 			adapters.push_back(std::move(adapter));
 		}
 		else
