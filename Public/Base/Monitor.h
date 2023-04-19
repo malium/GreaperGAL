@@ -21,26 +21,20 @@ namespace greaper::gal
 	{
 		math::RectI SizeRect;
 		math::RectI WorkRect;
-		int32 Index;
 		String Name;
 		Vector<PVideoMode> VideoModes;
 		sizet MainVideoMode;
-		float DiagonalDPI;
-		float HorizontalDPI;
-		float VerticalDPI;
+		float DPI;
 	};
 
 	class Monitor
 	{
 		math::RectI m_SizeRect;
 		math::RectI m_WorkRect;
-		int32 m_Index;
 		String m_Name;
 		Vector<PVideoMode> m_VideoModes;
 		sizet m_MainVideoMode;
-		float m_DiagonalDPI;
-		float m_HorizontalDPI;
-		float m_VerticalDPI;
+		float m_DPI;
 
 	public:
 		Monitor()noexcept = default;
@@ -48,8 +42,9 @@ namespace greaper::gal
 		Monitor(Monitor&&)noexcept = default;
 		Monitor& operator=(const Monitor&) = default;
 		Monitor& operator=(Monitor&&)noexcept = default;
+		virtual ~Monitor()noexcept = default;
 
-		void SetConfig(const MonitorConfig& config)noexcept;
+		virtual void SetConfig(const MonitorConfig& config)noexcept;
 
 		INLINE const math::RectI& GetSizeRect()const noexcept { return m_SizeRect; }
 
@@ -57,15 +52,9 @@ namespace greaper::gal
 
 		INLINE const String& GetName()const noexcept { return m_Name; }
 
-		INLINE int32 GetIndex()const noexcept { return m_Index; }
-
 		INLINE bool IsPrimary()const noexcept { return m_Index == 0; }
 
-		INLINE float GetDiagonalDPI()const noexcept { return m_DiagonalDPI; }
-
-		INLINE float GetHorizontalDPI()const noexcept { return m_HorizontalDPI; }
-
-		INLINE float GetVerticalDPI()const noexcept { return m_VerticalDPI; }
+		INLINE float GetDPI()const noexcept { return m_DPI; }
 
 		INLINE const Vector<PVideoMode>& GetVideoModes()const noexcept { return m_VideoModes; }
 
@@ -80,9 +69,7 @@ namespace greaper::gal
 		m_Name = config.Name;
 		m_VideoModes = config.VideoModes;
 		m_MainVideoMode = config.MainVideoMode;
-		m_DiagonalDPI = config.DiagonalDPI;
-		m_HorizontalDPI = config.HorizontalDPI;
-		m_VerticalDPI = config.VerticalDPI;
+		m_DPI = config.DPI;
 	}
 }
 

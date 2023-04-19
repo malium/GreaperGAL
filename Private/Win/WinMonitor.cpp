@@ -4,15 +4,18 @@
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
-#include "../../Public/Base/Monitor.h"
+#include "../../Public/Win/WinMonitor.h"
+#include "../WindowManager.h"
 #include "../../../GreaperCore/Public/Win/Win32User.h"
 #include "../../../GreaperCore/Public/Win/Win32GDI.h"
+#include "../../../GreaperCore/Public/Win/Win32ShellScalingAPI.h"
 #include "../GreaperGALDLL.h"
 
 using namespace greaper;
 using namespace greaper::gal;
 
 extern SPtr<GreaperGALLibrary> gGALLibrary;
+extern SPtr<WindowManager> gWindowManager;
 
 struct MonitorInfo
 {
@@ -22,11 +25,9 @@ struct MonitorInfo
 	WCHAR DeviceKey[128];
 	HMONITOR Handle = (HMONITOR)INVALID_HANDLE_VALUE;
 	bool Primary = false;
-	math::Vector2i Resolution{};
+	math::RectI SizeArea{};
 	math::RectI WorkArea{};
-	float HDPI{};
-	float VDPI{};
-	float DDPI{};
+	float DPI = 1.f;
 };
 
 struct AdapterInfo
@@ -39,6 +40,7 @@ struct AdapterInfo
 	WCHAR DeviceKey[128];
 	Vector<MonitorInfo> Monitors{};
 	Vector<VideoModeConfig> VideoModes{};
+	ssizet DefaultVideoMode = -1;
 };
 
 static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRECT lpRect, LPARAM lParam)
@@ -66,18 +68,24 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 	sizet i = 0, j = 0;
 	for (const auto& adapter : dav)
 	{
-		const auto& monitors = adapter.Monitors;
 		j = 0;
-		for (const auto& monitor : monitors)
+		if (wcsncmp(monInfo.szDevice, adapter.DeviceName, ArraySize(adapter.DeviceName)) == 0)
 		{
-			if (wcsncmp(monInfo.szDevice, monitor.DeviceName, ArraySize(monitor.DeviceName)) == 0)
-			{
-				adapterIdx = i;
-				monitorIdx = j;
-				break;
-			}
-			++j;
+			adapterIdx = i;
+			monitorIdx = j;
+			break;
 		}
+		//const auto& monitors = adapter.Monitors;
+		//for (const auto& monitor : monitors)
+		//{
+		//	if (wcsncmp(monInfo.szDevice, monitor.DeviceName, ArraySize(monitor.DeviceName)) == 0)
+		//	{
+		//		adapterIdx = i;
+		//		monitorIdx = j;
+		//		break;
+		//	}
+		//	++j;
+		//}
 		
 		if (adapterIdx >= 0 && monitorIdx >= 0)
 			break;
@@ -91,22 +99,12 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 	}
 
 	auto& monitorInfo = dav[adapterIdx].Monitors[monitorIdx];
-	monitorInfo.Primary = (monInfo.dwFlags & MONITORINFOF_PRIMARY) > 0;
-	const math::Vector2i distanceTo00 = { -monInfo.rcMonitor.left, -monInfo.rcMonitor.top };
-
-	monitorInfo.Resolution.Set(
-		((monInfo.rcMonitor.right - monInfo.rcMonitor.left) + distanceTo00.X),
-		((monInfo.rcMonitor.bottom - monInfo.rcMonitor.top) + distanceTo00.Y)
-	);
-
-	monitorInfo.WorkArea.Set(monInfo.rcWork);
-	//	((monInfo.rcWork.right - monInfo.rcWork.left) + distanceTo00.X),
-	//	((monInfo.rcWork.bottom - monInfo.rcWork.top) + distanceTo00.Y)
-	//);
+	monitorInfo.Primary = (monInfo.dwFlags & MONITORINFOF_PRIMARY) != 0;
 
 	monitorInfo.Handle = hMonitor;
 
 	// DPI 
+	UINT dpix, dpiy;
 	switch (OSPlatform::GetWindowsVersion())
 	{
 	case WindowsVersion_t::Windows7:
@@ -114,21 +112,43 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 	// Get System DPI
 	{
 		HDC hDCScreen = GetDC(nullptr);
-		const auto dpix = GetDeviceCaps(hDCScreen, LOGPIXELSX);
-		const auto dpiy = GetDeviceCaps(hDCScreen, LOGPIXELSY);
-		monitorInfo.HDPI = dpix / (float)USER_DEFAULT_SCREEN_DPI;
-		monitorInfo.VDPI = dpiy / (float)USER_DEFAULT_SCREEN_DPI;
+		dpix = (UINT)GetDeviceCaps(hDCScreen, LOGPIXELSX);
+		dpiy = (UINT)GetDeviceCaps(hDCScreen, LOGPIXELSY);
 		ReleaseDC(nullptr, hDCScreen);
 	}
 		break;
 	case WindowsVersion_t::Windows81:
 	case WindowsVersion_t::Windows10:
-
+	{
+		auto hRes = GetDpiForMonitor(hMonitor, MDT_DEFAULT, &dpix, &dpiy);
+		if (hRes == E_INVALIDARG)
+		{
+			gGALLibrary->LogWarning("Something wen't wrong calling GetDpiForMonitor, INVALID ARGUMENTS.");
+			return true;
+		}
+	}
 		break;
 	default:
-
+		dpix = dpiy = USER_DEFAULT_SCREEN_DPI;
 		break;
 	}
+
+
+	//RECT rcMonitorDPI, rcWorkDPI;
+	//rcMonitorDPI.left = monInfo.rcMonitor.left;
+	//rcMonitorDPI.right = rcMonitorDPI.left + MulDiv(monInfo.rcMonitor.right - rcMonitorDPI.left, USER_DEFAULT_SCREEN_DPI, dpix);
+	//rcMonitorDPI.top = monInfo.rcMonitor.top;
+	//rcMonitorDPI.bottom = rcMonitorDPI.top + MulDiv(monInfo.rcMonitor.bottom - rcMonitorDPI.top, USER_DEFAULT_SCREEN_DPI, dpiy);
+	//
+	//rcWorkDPI.left = rcMonitorDPI.left + MulDiv(monInfo.rcWork.left - rcMonitorDPI.left, USER_DEFAULT_SCREEN_DPI, dpix);
+	//rcWorkDPI.right = rcMonitorDPI.left + MulDiv(monInfo.rcWork.right - rcMonitorDPI.left, USER_DEFAULT_SCREEN_DPI, dpix);
+	//rcWorkDPI.top = rcMonitorDPI.top + MulDiv(monInfo.rcWork.top - rcMonitorDPI.top, USER_DEFAULT_SCREEN_DPI, dpiy);
+	//rcWorkDPI.bottom = rcMonitorDPI.top + MulDiv(monInfo.rcWork.bottom - rcMonitorDPI.top, USER_DEFAULT_SCREEN_DPI, dpiy);
+
+	//monitorInfo.Resolution.Set(Abs(monInfo.rcMonitor.right - monInfo.rcMonitor.left), Abs(monInfo.rcMonitor.bottom - monInfo.rcMonitor.top));
+	monitorInfo.SizeArea.Set(monInfo.rcMonitor);
+	monitorInfo.WorkArea.Set(monInfo.rcWork);
+	monitorInfo.DPI = ((dpix + dpiy) * 0.5f) / (float)USER_DEFAULT_SCREEN_DPI;
 
 	return true;
 }
@@ -191,6 +211,27 @@ static void QueryVideoModesFromAdapter(AdapterInfo& adapterInfo)noexcept
 	}
 }
 
+static void QueryDefaultVideoMode(AdapterInfo& adapterInfo)noexcept
+{
+	DEVMODEW devMode;
+	EnumDisplaySettingsW(adapterInfo.DeviceName, ENUM_CURRENT_SETTINGS, &devMode);
+
+	for (std::size_t i = 0; i < adapterInfo.VideoModes.size(); ++i)
+	{
+		const auto& videoMode = adapterInfo.VideoModes[i];
+		if (videoMode.Frequency == devMode.dmDisplayFrequency &&
+			videoMode.PixelDepth == devMode.dmBitsPerPel &&
+			videoMode.Resolution.X == devMode.dmPelsWidth &&
+			videoMode.Resolution.Y == devMode.dmPelsHeight)
+		{
+			adapterInfo.DefaultVideoMode = i;
+			break;
+		}
+	}
+	if(adapterInfo.DefaultVideoMode < 0)
+		adapterInfo.DefaultVideoMode = 0;
+}
+
 void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMonitorIdx)
 {
 	DISPLAY_DEVICEW dispDev;
@@ -219,6 +260,8 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 			if (adapter.VideoModes.empty())
 				continue;
 
+			QueryDefaultVideoMode(adapter);
+
 			adapters.push_back(std::move(adapter));
 		}
 		else
@@ -228,6 +271,133 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 	}
 	if (!EnumDisplayMonitors(nullptr, nullptr, &::MonitorQuery, (LPARAM)((void*)&adapters)))
 	{
+		gGALLibrary->LogWarning("EnumDisplayMonitors failed!");
+	}
 
+	// Remove non existant monitors and update information on the connected ones
+	//for (const auto& monitor : monitors)
+	bool mainMonitorChanged = false;
+	PMonitor oldMainMonitor = PMonitor();
+	if (monitors.size() > mainMonitorIdx)
+		oldMainMonitor = monitors[mainMonitorIdx];
+	for(std::size_t i = 0; i < monitors.size(); )
+	{
+		auto& monitor = monitors[i];
+		auto& winMonitor = (SPtr<WinMonitor>&)monitor;
+		ssizet adapterIdx = -1, monitorIdx = -1;
+		for(std::size_t j = 0; j < adapters.size(); ++j)
+		{
+			const auto& adapter = adapters[j];
+			for(std::size_t k = 0; k < adapter.Monitors.size(); ++k)
+			{
+				const auto& adapterMonitor = adapter.Monitors[k];
+				if (winMonitor->GetOSHandle() == adapterMonitor.Handle)
+				{
+					adapterIdx = j;
+					monitorIdx = k;
+					break;
+				}
+			}
+			if (adapterIdx >= 0 && monitorIdx >= 0)
+				break;
+		}
+		if (adapterIdx < 0 || monitorIdx < 0)
+		{
+			gGALLibrary->LogVerbose(Format("Monitor %s has been disconnected.", monitor->GetName().c_str()));
+			gWindowManager->GetMonitorDisconnectedEvent().Trigger(monitor);
+			monitors.erase(monitors.begin() + i);
+			continue;
+		}
+
+		const auto& curAdapter = adapters[adapterIdx];
+		const auto& curMonitor = curAdapter.Monitors[monitorIdx];
+
+		if (!mainMonitorChanged)
+		{
+			bool isMainMonitor = monitor->IsPrimary();
+			bool isMainMonitorOS = curAdapter.Active && curAdapter.Default && curMonitor.Primary;
+			mainMonitorChanged = isMainMonitor != isMainMonitorOS;
+		}
+
+		bool mainVideoModeChanged = false;
+		const auto& curVideoModeInfo = curAdapter.VideoModes[curAdapter.DefaultVideoMode];
+		auto oldMainVideoMode = monitor->GetMainVideoMode();
+		if (oldMainVideoMode != nullptr)
+		{
+			if (oldMainVideoMode->GetFrequency() != curVideoModeInfo.Frequency ||
+				oldMainVideoMode->GetPixelDepth() != curVideoModeInfo.PixelDepth ||
+				oldMainVideoMode->GetResolution() != curVideoModeInfo.Resolution)
+			{
+				mainVideoModeChanged = true;
+				break;
+			}
+		}
+
+		bool monitorInformationChanged = false;
+		PVideoMode curMainVideoMode{};
+		bool redoVideoModes = false;
+		// Check if monitor changed the video modes
+		if (monitor->GetVideoModes().size() == curAdapter.VideoModes.size())
+		{
+			// Maybe are the same but we have to check them all...
+			for (const auto& videoMode : monitor->GetVideoModes())
+			{
+				if (!Contains(curAdapter.VideoModes, [&videoMode](const VideoModeConfig& vmc)
+					{
+						return videoMode->GetFrequency() != vmc.Frequency
+							|| videoMode->GetPixelDepth() != vmc.PixelDepth
+							|| videoMode->GetResolution() != vmc.Resolution;
+					}))
+				{
+					redoVideoModes = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			redoVideoModes = true;
+		}
+
+		if (monitor->GetDPI() != curMonitor.DPI ||
+			monitor->GetSizeRect() != curMonitor.SizeArea ||
+			monitor->GetWorkRect() != curMonitor.WorkArea)
+		{
+			monitorInformationChanged = true;
+		}
+		
+
+
+
+		if (mainVideoModeChanged || monitorInformationChanged)
+		{
+			gGALLibrary->LogVerbose(Format("The main video mode from '%s' monitor has changed from [%dx%d](%dbits %dhz) to [%dx%d](%dbits %dhz).",
+				oldMainVideoMode->GetMonitor().lock()->GetName().c_str(),
+				oldMainVideoMode->GetResolution().X, oldMainVideoMode->GetResolution().Y, oldMainVideoMode->GetPixelDepth(), oldMainVideoMode->GetFrequency(),
+				curMainVideoMode->GetResolution().X, curMainVideoMode->GetResolution().Y, curMainVideoMode->GetPixelDepth(), curMainVideoMode->GetFrequency()));
+			gWindowManager->GetMonitorMainVideoModeChangedEvent().Trigger(monitor, oldMainVideoMode, curMainVideoMode);
+		}
+
+		++i;
+	}
+	
+	
+	// Add the new monitors
+
+
+
+	if (mainMonitorChanged)
+	{
+		for (std::size_t i = 0; i < monitors.size(); ++i)
+		{
+			const auto& monitor = monitors[i];
+			if (monitor->IsPrimary())
+			{
+				mainMonitorIdx = i;
+				gGALLibrary->LogVerbose("The main monitor has changed!");
+				gWindowManager->GetMonitorMainChangedEvent().Trigger(oldMainMonitor, monitor);
+				break;
+			}
+		}
 	}
 }

@@ -32,20 +32,40 @@ namespace greaper::gal
 		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
 		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
 
-		using MonitorConnected_t = Event<const PMonitor& /* monitor */>;
-		using MonitorDisconnected_t = Event<const PMonitor& /* monitor */>;
-		using MonitorMainChanged_t = Event<const PMonitor& /* previous */, const PMonitor& /* current */>;
-		using MonitorMainVideoModeChanged_t = Event<const PVideoMode& /* previous */, const PVideoMode& /* current */>;
+		using MonitorConnectedEvent_t = Event<const PMonitor& /* monitor */>;
+		using MonitorDisconnectedEvent_t = Event<const PMonitor& /* monitor */>;
+		using MonitorMainChangedEvent_t = Event<const PMonitor& /* previous */, const PMonitor& /* current */>;
+		using MonitorMainVideoModeChangedEvent_t = Event<const PMonitor&, const PVideoMode& /* previous */, const PVideoMode& /* current */>;
 
 		virtual TResult<PWindow> CreateWindow(const WindowDesc& windowDesc) = 0;
 
-		virtual SPtr<Monitor> GetMainMonitor()const = 0;
+		virtual PMonitor GetMainMonitor()const = 0;
 		
 		virtual void AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn)const = 0;
 
 		virtual void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn)const = 0;
 
 		virtual WPtr<Win32DPIScalingProp_t> GetWin32DPIScaling()const noexcept = 0;
+
+		virtual WindowCreationEvent_t& GetWindowCreationEvent()const noexcept = 0;
+
+		virtual WindowDestructionEvent_t& GetWindowDestructionEvent()const noexcept = 0;
+
+		virtual WindowMovedEvent_t& GetWindowMovedEvent()const noexcept = 0;
+
+		virtual WindowResizedEvent_t& GetWindowResizedEvent()const noexcept = 0;
+
+		virtual WindowModeChangedEvent_t& GetWindowModeChangedEvent()const noexcept = 0;
+
+		virtual WindowStateChangedEvent_t& GetWindowStateChangedEvent()const noexcept = 0;
+
+		virtual MonitorConnectedEvent_t& GetMonitorConnectedEvent()const noexcept = 0;
+
+		virtual MonitorDisconnectedEvent_t& GetMonitorDisconnectedEvent()const noexcept = 0;
+
+		virtual MonitorMainChangedEvent_t& GetMonitorMainChangedEvent()const noexcept = 0;
+
+		virtual MonitorMainVideoModeChangedEvent_t& GetMonitorMainVideoModeChangedEvent()const noexcept = 0;
 	};
 }
 

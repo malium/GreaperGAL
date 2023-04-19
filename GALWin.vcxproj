@@ -244,6 +244,7 @@
     <ClInclude Include="Private\WindowManager.h" />
     <ClInclude Include="Private\Win\GLWinWindow.h" />
     <ClInclude Include="Private\Win\VkWinWindow.h" />
+    <ClInclude Include="Public\Win\WinMonitor.h" />
     <ClInclude Include="Private\Win\WinWindow.h" />
     <ClInclude Include="Public\Base\DisplayAdapter.h" />
     <ClInclude Include="Public\Base\IWindow.h" />
