@@ -31,9 +31,6 @@ namespace greaper::gal
 		mutable RWMutex m_WindowMutex;
 		Vector<PWindow> m_Windows;
 
-		WThreadManager m_ThreadManager;
-		WThread m_MainThread;
-
 		mutable WindowCreationEvent_t m_WindowCreationEvent;
 		mutable WindowDestructionEvent_t m_WindowDestructionEvent;
 		mutable WindowMovedEvent_t m_WindowMovedEvent;
@@ -44,12 +41,6 @@ namespace greaper::gal
 		mutable MonitorDisconnectedEvent_t m_MonitorDisconnectedEvent;
 		mutable MonitorMainChangedEvent_t m_MonitorMainChangedEvent;
 		mutable MonitorMainVideoModeChangedEvent_t m_MonitorMainVideoModeChangedEvent;
-
-		// ThreadManager getter and updater
-		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
-		void OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface)noexcept;
-		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
-		void OnNewManager(const PInterface& newInterface)noexcept;
 
 	public:
 		WindowManager()noexcept = default;

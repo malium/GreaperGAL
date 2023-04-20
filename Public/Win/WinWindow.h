@@ -23,11 +23,10 @@ namespace greaper::gal
 	{
 	public:
 		using MessageFn = std::function<LRESULT(WinWindow* window, WPARAM wParam, LPARAM lParam)>;
+
 	protected:
 		HWND m_WindowHandle;
 		HDC m_DC;
-		DWORD m_Style;
-		DWORD m_StyleEx;
 		DWORD m_LastMessageID;
 		Map<UINT, MessageFn> m_MessageMap;
 
@@ -55,13 +54,11 @@ namespace greaper::gal
 		}
 
 	public:
+		virtual ~WinWindow()noexcept = default;
+
 		INLINE HWND GetOSHandle()const noexcept { SHAREDLOCK(m_Mutex); return m_WindowHandle; }
 
 		INLINE HDC GetDC()const noexcept { SHAREDLOCK(m_Mutex); return m_DC; }
-		
-		INLINE DWORD GetCurrentStyle()const noexcept { SHAREDLOCK(m_Mutex); return m_Style; }
-		
-		INLINE DWORD GetCurrentStyleEX()const noexcept { SHAREDLOCK(m_Mutex); return m_StyleEx; }
 		
 		INLINE EmptyResult SetWinMessage(UINT messageID, MessageFn messageFn)noexcept
 		{

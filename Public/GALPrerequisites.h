@@ -24,8 +24,8 @@ namespace greaper::gal
 	struct WindowDesc;
 #if PLT_WINDOWS
 	struct WinWindowDesc;
-	struct WinGLWindowDesc;
-	struct WinVkWindowDesc;
+	struct GLWinWindowDesc;
+	struct VkWinWindowDesc;
 #elif PLT_LINUX
 	struct X11WindowDesc;
 	struct WLWindowDesc;

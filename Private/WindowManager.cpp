@@ -25,16 +25,6 @@ extern EmptyResult EnableDPI();
 SPtr<WindowManager> gWindowManager = {};
 extern SPtr<GreaperGALLibrary> gGALLibrary;
 
-void greaper::gal::WindowManager::OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface) noexcept
-{
-
-}
-
-void greaper::gal::WindowManager::OnNewManager(const PInterface& newInterface) noexcept
-{
-
-}
-
 void WindowManager::OnInitialization() noexcept
 {
 
@@ -156,7 +146,7 @@ template<class TWindow>
 static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDesc)noexcept
 {
 	auto window = SPtr<TWindow>(Construct<TWindow>());
-	windowDesc.Scheduler->AddTask((SlimTask)[&output, &window, &windowDesc]()
+	auto futureRes = windowDesc.Scheduler->AddTask((SlimTask)[&output, &window, &windowDesc]()
 		{
 			EmptyResult rtn = window->Create(windowDesc);
 			if (rtn.HasFailed())
@@ -164,32 +154,69 @@ static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDes
 			else
 				output = Result::CreateSuccess((PWindow)window);
 		});
+	if (futureRes.HasFailed())
+		output = Result::CopyFailure<PWindow>(futureRes);
+
+	futureRes.GetValue().wait();
 }
 
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)
 {
-	WindowDesc desc = windowDesc;
-	if(desc.Scheduler == nullptr)
-		desc.Scheduler = SlimTaskScheduler::Create(m_ThreadManager, "GreaperWindow TaskScheduler"sv, 1, false);
-	
-	if (desc.Scheduler->GetWorkerCount() != 1)
-		return Result::CreateFailure<PWindow>(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", desc.Scheduler->GetWorkerCount()));
+	auto fixScheduler = [this](WindowDesc& desc)
+	{
+		if (desc.Scheduler == nullptr)
+		{
+			// Get the thread manager
+			VerifyNot(m_Library.expired(), "Trying to get the ThreadManager, but library is expired!");
+			auto lib = m_Library.lock();
+			auto wApp = lib->GetApplication();
+			VerifyNot(wApp.expired(), "Trying to get the ThreadManager, but Application is expired!");
+			auto app = wApp.lock();
+			auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
+			if (thmgrRes.HasFailed())
+				return Result::CopyFailure(thmgrRes);
+
+			auto thmgr = (PThreadManager)thmgrRes.GetValue();
+			desc.Scheduler = SlimTaskScheduler::Create((WThreadManager)thmgr, "GreaperWindow TaskScheduler"sv, 1, false);
+		}
+		if (desc.Scheduler->GetWorkerCount() != 1)
+			return Result::CreateFailure(Format("Trying to create a window with a scheduler that doesn't have exactly 1 worker, it has %d workers.", desc.Scheduler->GetWorkerCount()));
+		return Result::CreateSuccess();
+	};
 	
 	TResult<PWindow> output;
 #if PLT_WINDOWS
-	switch (desc.GetBackend())
+	switch (windowDesc.GetBackend())
 	{
 	case RenderBackend_t::Native:
+	{
+		WinWindowDesc desc = (const WinWindowDesc&)windowDesc;
+		EmptyResult schRes = fixScheduler(desc);
+		if (schRes.HasFailed())
+			return Result::CopyFailure<PWindow>(schRes);
 		WindowCreation<WinWindowImpl>(output, desc);
+	}
 		break;
 	case RenderBackend_t::OpenGL:
+	{
+		GLWinWindowDesc desc = (const GLWinWindowDesc&)windowDesc;
+		EmptyResult schRes = fixScheduler(desc);
+		if (schRes.HasFailed())
+			return Result::CopyFailure<PWindow>(schRes);
 		WindowCreation<GLWinWindowImpl>(output, desc);
+	}
 		break;
 	case RenderBackend_t::Vulkan:
+	{
+		VkWinWindowDesc desc = (const VkWinWindowDesc&)windowDesc;
+		EmptyResult schRes = fixScheduler(desc);
+		if (schRes.HasFailed())
+			return Result::CopyFailure<PWindow>(schRes);
 		WindowCreation<VkWinWindowImpl>(output, desc);
+	}
 		break;
 	default:
-		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(desc.GetBackend()).data()));
+		return Result::CreateFailure<PWindow>(Format("Trying to create a Windows window but the given backend %s is not implemented.", TEnum<RenderBackend_t>::ToString(windowDesc.GetBackend()).data()));
 	}
 #elif PLT_LINUX
 	auto lnxDesc = (const LnxWindowDesc&)desc;

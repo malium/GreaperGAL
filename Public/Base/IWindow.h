@@ -49,13 +49,13 @@ namespace greaper::gal
 		bool ResizingEnabled = true; // Allow to resize the window by the user
 		bool StartVisible = true; // Window should start visible (active on Windows), meaning that if its not active, window is running but not visible on the user desktop
 		bool StartFocused = true; // Window should start on top and with keyboard and mouse focus
-		PMonitor Monitor; // On what monitor should the window appear, null selects the primary one.
-		PSlimScheduler Scheduler = PSlimScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
+		PMonitor Monitor{}; // On what monitor should the window appear, null selects the primary one.
+		PSlimScheduler Scheduler{}; // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
 		math::Vector2f ResizingAspectRatio = math::Vector2f(0.f, 0.f); // What ratio aspec ratio scaling is allowed, example (16,9), (<=0,<=0) will not lock scaling
 		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
-		PWindow ParentWindow = PWindow();
-		FramebufferDesc Framebuffer = FramebufferDesc();
+		PWindow ParentWindow{};
+		FramebufferDesc Framebuffer{};
 
 		INLINE constexpr RenderBackend_t GetBackend()const noexcept { return Backend; }
 		constexpr WindowDesc()noexcept = default;
