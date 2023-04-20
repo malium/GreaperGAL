@@ -25,6 +25,7 @@ namespace greaper::gal
 		Vector<PVideoMode> VideoModes;
 		sizet MainVideoMode;
 		float DPI;
+		bool Primary;
 	};
 
 	class Monitor
@@ -35,6 +36,7 @@ namespace greaper::gal
 		Vector<PVideoMode> m_VideoModes;
 		sizet m_MainVideoMode;
 		float m_DPI;
+		bool m_Primary;
 
 	public:
 		Monitor()noexcept = default;
@@ -52,7 +54,7 @@ namespace greaper::gal
 
 		INLINE const String& GetName()const noexcept { return m_Name; }
 
-		INLINE bool IsPrimary()const noexcept { return m_Index == 0; }
+		INLINE bool IsPrimary()const noexcept { return m_Primary; }
 
 		INLINE float GetDPI()const noexcept { return m_DPI; }
 
@@ -65,11 +67,11 @@ namespace greaper::gal
 	{
 		m_SizeRect = config.SizeRect;
 		m_WorkRect = config.WorkRect;
-		m_Index = config.Index;
 		m_Name = config.Name;
 		m_VideoModes = config.VideoModes;
 		m_MainVideoMode = config.MainVideoMode;
 		m_DPI = config.DPI;
+		m_Primary = config.Primary;
 	}
 }
 
