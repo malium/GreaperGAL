@@ -18,8 +18,46 @@ extern SPtr<GreaperGALLibrary> gGALLibrary;
 
 static constexpr WStringView gWindowClassID = L"GreaperWindow"sv;
 
+/*
+Message order:
+WM_GETMINMAXINFO
+WM_NCCREATE
+WM_NCCALCSIZE
+WM_CREATE
+WM_SHOWWINDOW
+WM_WINDOWPOSCHANGING
+WM_WINDOWPOSCHANGING
+WM_ACTIVATEAPP
+WM_NCACTIVATE
+WM_GETICON
+WM_GETICON
+WM_GETICON
+WM_ACTIVATE
+WM_IME_SETCONTEXT
+WM_IME_NOTIFY
+WM_SETFOCUS
+WM_NCPAINT
+WM_ERASEBKGND
+WM_WINDOWPOSCHANGED
+WM_SIZE
+WM_MOVE
+WM_PAINT
+0x0090
+WM_WINDOWPOSCHANGING
+WM_WINDOWPOSCHANGED
+WM_NCACTIVATE
+WM_ACTIVATE
+WM_ACTIVATEAPP
+WM_KILLFOCUS
+WM_IME_SETCONTEXT
+WM_IME_NOTIFY
+WM_DESTROY
+WM_NCDESTROY
+*/
+
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
 	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -98,9 +136,10 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 	if (regFailed)
 	{
-		const auto errCode = GetLastError();
 		m_Mutex.unlock();
-		return Result::CreateFailure(Format("RegisterClassExW failed with code " I32_HEX_FMT, errCode));
+		const auto errCode = GetLastError();
+		return Result::CreateFailure(Format("RegisterClassExW failed with error code " I32_HEX_FMT ", error message '%S'.", errCode,
+			OSPlatform::GetLastErrorAsString(errCode).c_str()));
 	}
 
 	auto wTitle = StringUtils::ToWIDE(desc.Title);
@@ -111,24 +150,42 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 	m_WindowHandle = CreateWindowExW(dwStyleEx, gWindowClassID.data(), wTitle.c_str(),
 		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | dwStyle,
-		CW_USEDEFAULT, CW_USEDEFAULT, desc.Size.X, desc.Size.Y, parentWindow, nullptr, wc.hInstance, this);
+		CW_USEDEFAULT, CW_USEDEFAULT, desc.Size.X, desc.Size.Y, parentWindow, nullptr, wc.hInstance, nullptr);
 
 	if (m_WindowHandle == nullptr)
 	{
-		const auto errCode = GetLastError();
 		m_Mutex.unlock();
-		return Result::CreateFailure(Format("CreateWindowExW failed with code " I32_HEX_FMT, errCode));
+		const auto errCode = GetLastError();
+		return Result::CreateFailure(Format("CreateWindowExW failed with code " I32_HEX_FMT ", error message '%S'.", errCode,
+			OSPlatform::GetLastErrorAsString(errCode).c_str()));
 	}
 
-	//ChangeWindowMessageFilterEx(m_Handle, WM_DROPFILES, MSGFLT_ALLOW, nullptr);
-	//ChangeWindowMessageFilterEx(m_Handle, WM_COPYDATA, MSGFLT_ALLOW, nullptr);
-	//ChangeWindowMessageFilterEx(m_Handle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, nullptr);
+	auto swlpRet = SetWindowLongPtrW(m_WindowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+	if (swlpRet == 0)
+	{
+		const auto errorCode = GetLastError();
+		if (errorCode != 0)
+		{
+			DestroyWindow(m_WindowHandle);
+			m_WindowHandle = nullptr;
+			m_Mutex.unlock();
+			return Result::CreateFailure(Format("SetWindowLongPtrW failed with code " I32_HEX_FMT ", error message '%S'.", errorCode,
+				OSPlatform::GetLastErrorAsString(errorCode).c_str()));
+		}
+	}
+
+	ChangeWindowMessageFilterEx(m_WindowHandle, WM_DROPFILES, MSGFLT_ALLOW, nullptr);
+	ChangeWindowMessageFilterEx(m_WindowHandle, WM_COPYDATA, MSGFLT_ALLOW, nullptr);
+	ChangeWindowMessageFilterEx(m_WindowHandle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, nullptr);
 
 	::ShowWindow(m_WindowHandle, SW_SHOWNORMAL);
 	SetForegroundWindow(m_WindowHandle);
 	SetFocus(m_WindowHandle);
 	UpdateWindow(m_WindowHandle);
 
+	
+	//DestroyWindow(m_WindowHandle);
+	//m_WindowHandle = nullptr;
 	m_Mutex.unlock();
 	return Result::CreateFailure("Not implemented"sv);
 }

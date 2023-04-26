@@ -60,7 +60,8 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 	if (!GetMonitorInfoW(hMonitor, &monInfo))
 	{
 		const auto err = GetLastError();
-		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, but something went wrong, error: " I32_HEX_FMT ".", err));
+		gGALLibrary->LogError(Format("Trying to retrieve the monitor info, but something went wrong, error code " I32_HEX_FMT " error message '%S'.", err,
+			OSPlatform::GetLastErrorAsString(err).c_str()));
 		return true;
 	}
 	ssizet adapterIdx = -1;
@@ -220,8 +221,8 @@ static void QueryDefaultVideoMode(AdapterInfo& adapterInfo)noexcept
 	for (std::size_t i = 0; i < adapterInfo.VideoModes.size(); ++i)
 	{
 		const auto& videoMode = adapterInfo.VideoModes[i];
-		if (videoMode.Frequency == devMode.dmDisplayFrequency &&
-			videoMode.PixelDepth == devMode.dmBitsPerPel &&
+		if ((DWORD)videoMode.Frequency == devMode.dmDisplayFrequency &&
+			(DWORD)videoMode.PixelDepth == devMode.dmBitsPerPel &&
 			videoMode.Resolution.X == devMode.dmPelsWidth &&
 			videoMode.Resolution.Y == devMode.dmPelsHeight)
 		{

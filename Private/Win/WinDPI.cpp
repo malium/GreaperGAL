@@ -101,7 +101,8 @@ static EmptyResult EnableUnawareGDIScaling()
 	if (!isOK)
 	{
 		const auto errorCode = GetLastError();
-		gGALLibrary->LogWarning(Format("Couldn't enable UnawareGDIScaling DPI scaling, error code " I32_HEX_FMT ", trying Unaware.", errorCode));
+		gGALLibrary->LogWarning(Format("Couldn't enable UnawareGDIScaling DPI scaling, error code " I32_HEX_FMT " error message '%S', trying Unaware.", errorCode,
+			OSPlatform::GetLastErrorAsString(errorCode).c_str()));
 		return EnableUnaware();
 	}
 	gDPIProp->SetValue(Win32DPIScaling_t::UNAWARE_GDISCALING, true);
@@ -220,7 +221,8 @@ static EmptyResult EnableMonitorAwareV2()
 	if (!isOK)
 	{
 		const auto errorCode = GetLastError();
-		gGALLibrary->LogWarning(Format("Couldn't enable MonitorAwareV2 DPI scaling, error code " I32_HEX_FMT ", trying MonitorAware.", errorCode));
+		gGALLibrary->LogWarning(Format("Couldn't enable MonitorAwareV2 DPI scaling, error code " I32_HEX_FMT " error message '%S', trying MonitorAware.", errorCode,
+			OSPlatform::GetLastErrorAsString(errorCode).c_str()));
 		return EnableMonitorAware();
 	}
 	gDPIProp->SetValue(Win32DPIScaling_t::MONITOR_AWARE_V2, true);
