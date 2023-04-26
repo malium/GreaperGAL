@@ -146,7 +146,7 @@ template<class TWindow>
 static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDesc)noexcept
 {
 	auto window = SPtr<TWindow>(Construct<TWindow>());
-	auto futureRes = windowDesc.Scheduler->AddTask((SlimTask)[&output, &window, &windowDesc]()
+	auto futureRes = windowDesc.Scheduler->AddTask([&output, &window, &windowDesc]()
 		{
 			EmptyResult rtn = window->Create(windowDesc);
 			if (rtn.HasFailed())
@@ -157,7 +157,8 @@ static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDes
 	if (futureRes.HasFailed())
 		output = Result::CopyFailure<PWindow>(futureRes);
 
-	futureRes.GetValue().wait();
+	windowDesc.Scheduler->WaitUntilTaskFinished(futureRes.GetValue());
+	//futureRes.GetValue().wait();
 }
 
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& windowDesc)

@@ -33,9 +33,12 @@ namespace greaper::gal
 		String GetClipboardText() const override;
 		EmptyResult SetClipboardText(StringView text) override;
 		bool HasClipboardText() override;
+		void PollEvents()override;
 		void SwapWindow() override;
 		void CloseWindow() override;
 		RenderBackend_t GetRenderBackend() const override;
+
+		LRESULT OnWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	};
 }
 

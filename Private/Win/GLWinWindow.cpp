@@ -98,6 +98,11 @@ bool greaper::gal::GLWinWindowImpl::HasClipboardText()
 	return false;
 }
 
+void greaper::gal::GLWinWindowImpl::PollEvents()
+{
+	Break("Not implemented.");
+}
+
 void greaper::gal::GLWinWindowImpl::SwapWindow()
 {
 	Break("Not implemented.");

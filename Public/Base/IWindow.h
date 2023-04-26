@@ -89,6 +89,7 @@ namespace greaper::gal
 		bool m_ShouldClose = false;
 		WWindowManager m_WindowManager;
 		PSlimScheduler m_TaskScheduler;
+		ThreadID_t m_ThreadID;
 		PWindow m_This;
 
 		mutable WindowClosingEvent_t m_WindowClosingEvt;

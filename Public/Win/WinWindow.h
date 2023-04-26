@@ -73,17 +73,6 @@ namespace greaper::gal
 		}
 
 		INLINE DWORD GetLastMessageID()const noexcept { SHAREDLOCK(m_Mutex); return m_LastMessageID; }
-
-		INLINE void PollEvents() override
-		{
-			MSG msg;
-			while (PeekMessageW(&msg, m_WindowHandle, 0, 0, PM_REMOVE) != 0)
-			{
-				TranslateMessage(&msg);
-
-				DispatchMessageW(&msg);
-			}
-		}
 	};
 }
 

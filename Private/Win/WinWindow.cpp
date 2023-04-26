@@ -9,6 +9,7 @@
 #include "../GreaperGALDLL.h"
 #include "../../../GreaperCore/Public/Win/Win32Base.h"
 #include "../../../GreaperCore/Public/StringUtils.h"
+#include "../../../GreaperCore/Public/SlimTaskScheduler.h"
 
 using namespace greaper;
 using namespace greaper::gal;
@@ -57,7 +58,10 @@ WM_NCDESTROY
 
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
+	auto* wnd = reinterpret_cast<WinWindowImpl*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+	if (wnd != nullptr)
+		return wnd->OnWindowProc(hWnd, uMsg, wParam, lParam);
+
 	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -68,6 +72,9 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 //	return Result::CreateFailure("Not implemented"sv);
 
 	m_Mutex.lock(); // we don't want any modification except ours
+
+	m_ThreadID = CUR_THID();
+	m_TaskScheduler = desc.Scheduler;
 
 	// retrieve monitor
 	if (windowDesc.Monitor != nullptr)
@@ -187,7 +194,8 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	//DestroyWindow(m_WindowHandle);
 	//m_WindowHandle = nullptr;
 	m_Mutex.unlock();
-	return Result::CreateFailure("Not implemented"sv);
+	//return Result::CreateFailure("Not implemented"sv);
+	return Result::CreateSuccess();
 }
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowSize(math::Vector2i size)
@@ -272,6 +280,24 @@ bool greaper::gal::WinWindowImpl::HasClipboardText()
 	return false;
 }
 
+void greaper::gal::WinWindowImpl::PollEvents()
+{
+	MSG msg;
+	while (PeekMessageW(&msg, m_WindowHandle, 0, 0, PM_REMOVE) != 0)
+	{
+		if (msg.message == WM_QUIT || msg.message == WM_CLOSE || msg.message == WM_DESTROY)
+		{
+			LOCK(m_Mutex);
+			m_ShouldClose = true;
+			break;
+		}
+		TranslateMessage(&msg);
+
+		DispatchMessageW(&msg);
+	}
+
+}
+
 void greaper::gal::WinWindowImpl::SwapWindow()
 {
 	Break("Not implemented.");
@@ -285,4 +311,28 @@ void greaper::gal::WinWindowImpl::CloseWindow()
 RenderBackend_t greaper::gal::WinWindowImpl::GetRenderBackend() const
 {
 	return RenderBackend_t::Native;
+}
+
+LRESULT greaper::gal::WinWindowImpl::OnWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
+
+	if (!m_ShouldClose)
+	{
+		if (uMsg == WM_CLOSE)
+		{
+			LOCK(m_Mutex);
+			m_ShouldClose = true;
+			DestroyWindow(m_WindowHandle);
+			m_WindowHandle = nullptr;
+			return 0;
+		}
+		if (uMsg == WM_DESTROY || uMsg == WM_QUIT)
+		{
+			LOCK(m_Mutex);
+			m_ShouldClose = true;
+		}
+	}
+	
+	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }

@@ -223,8 +223,8 @@ static void QueryDefaultVideoMode(AdapterInfo& adapterInfo)noexcept
 		const auto& videoMode = adapterInfo.VideoModes[i];
 		if ((DWORD)videoMode.Frequency == devMode.dmDisplayFrequency &&
 			(DWORD)videoMode.PixelDepth == devMode.dmBitsPerPel &&
-			videoMode.Resolution.X == devMode.dmPelsWidth &&
-			videoMode.Resolution.Y == devMode.dmPelsHeight)
+			(DWORD)videoMode.Resolution.X == devMode.dmPelsWidth &&
+			(DWORD)videoMode.Resolution.Y == devMode.dmPelsHeight)
 		{
 			adapterInfo.DefaultVideoMode = i;
 			break;
