@@ -145,7 +145,7 @@ void WindowManager::AccessMonitors(const std::function<void(CSpan<PMonitor>)>& a
 template<class TWindow>
 static void WindowCreation(TResult<PWindow>& output, const WindowDesc& windowDesc)noexcept
 {
-	auto window = SPtr<TWindow>(Construct<TWindow>());
+	auto window = ConstructShared<TWindow>();//SPtr<TWindow>(Construct<TWindow>());
 	auto futureRes = windowDesc.Scheduler->AddTask([&output, &window, &windowDesc]()
 		{
 			EmptyResult rtn = window->Create(windowDesc);

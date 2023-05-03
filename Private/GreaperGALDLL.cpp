@@ -71,7 +71,7 @@ void greaper::gal::GreaperGALLibrary::Initialize() noexcept
 void greaper::gal::GreaperGALLibrary::AddManagers()noexcept
 {
 	// add more managers
-	gWindowManager.reset(Construct<WindowManager>());
+	gWindowManager = ConstructShared<WindowManager>(); //.reset(Construct<WindowManager>());
 	m_Managers.push_back((PInterface)gWindowManager);
 
 }

@@ -60,7 +60,7 @@ namespace greaper::gal
 
 		INLINE const Vector<PVideoMode>& GetVideoModes()const noexcept { return m_VideoModes; }
 
-		INLINE PVideoMode GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
+		inline PVideoMode GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
 	};
 
 	INLINE void Monitor::SetConfig(const MonitorConfig& config)noexcept

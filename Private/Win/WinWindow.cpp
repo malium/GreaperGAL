@@ -10,6 +10,7 @@
 #include "../../../GreaperCore/Public/Win/Win32Base.h"
 #include "../../../GreaperCore/Public/StringUtils.h"
 #include "../../../GreaperCore/Public/SlimTaskScheduler.h"
+#include "../../../GreaperCore/Public/StringUtils.h"
 
 using namespace greaper;
 using namespace greaper::gal;
@@ -55,6 +56,10 @@ WM_IME_NOTIFY
 WM_DESTROY
 WM_NCDESTROY
 */
+
+#define ENSURE_WINDOW_THREAD()\
+VerifyEqual(CUR_THID(), m_ThreadID, "A window call must be done from the window thread.")
+
 
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -200,88 +205,104 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowSize(math::Vector2i size)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(math::Vector2i size)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(AnchoredPosition_t anchor)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 void greaper::gal::WinWindowImpl::SetWindowTitle(StringView title)
 {
-	Break("Not implemented.");
+	ENSURE_WINDOW_THREAD();
+	SetWindowTextW(m_WindowHandle, StringUtils::ToWIDE(title).c_str());
 }
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowMode(WindowMode_t mode)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 EmptyResult greaper::gal::WinWindowImpl::ChangeWindowState(WindowState_t state)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 void greaper::gal::WinWindowImpl::ShowWindow()
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::HideWindow()
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::RequestFocus()
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::EnableResizing(bool enable)
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 void greaper::gal::WinWindowImpl::SetMinWindowSize(math::Vector2i minSize, bool changeCurrent)
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
 String greaper::gal::WinWindowImpl::GetClipboardText() const
 {
-	Break("Not implemented.");
+	ENSURE_WINDOW_THREAD();
 	return String();
 }
 
 EmptyResult greaper::gal::WinWindowImpl::SetClipboardText(StringView text)
 {
+	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
 bool greaper::gal::WinWindowImpl::HasClipboardText()
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 	return false;
 }
 
 void greaper::gal::WinWindowImpl::PollEvents()
 {
+	ENSURE_WINDOW_THREAD();
 	MSG msg;
 	while (PeekMessageW(&msg, m_WindowHandle, 0, 0, PM_REMOVE) != 0)
 	{
@@ -300,11 +321,13 @@ void greaper::gal::WinWindowImpl::PollEvents()
 
 void greaper::gal::WinWindowImpl::SwapWindow()
 {
-	Break("Not implemented.");
+	ENSURE_WINDOW_THREAD();
+	/* No-op */
 }
 
 void greaper::gal::WinWindowImpl::CloseWindow()
 {
+	ENSURE_WINDOW_THREAD();
 	Break("Not implemented.");
 }
 
@@ -315,7 +338,8 @@ RenderBackend_t greaper::gal::WinWindowImpl::GetRenderBackend() const
 
 LRESULT greaper::gal::WinWindowImpl::OnWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
+	//gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
+
 
 	if (!m_ShouldClose)
 	{

@@ -239,7 +239,7 @@ static void AddVideoModesToMonitorConfig(const Vector<VideoModeConfig>& vmcs, co
 	config.VideoModes.reserve(vmcs.size());
 	for (VideoModeConfig videoModeConfig : vmcs)
 	{
-		auto videoMode = PVideoMode(Construct<VideoMode>());
+		auto videoMode = ConstructShared<VideoMode>();
 		videoModeConfig.ParentMonitor = (WMonitor)monitor;
 		videoMode->SetConfig(videoModeConfig);
 		config.VideoModes.push_back(std::move(videoMode));
@@ -462,7 +462,8 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 				continue; // Avoid already fine monitors with ok index
 			}
 
-			auto nMonitor = SPtr<WinMonitor>(Construct<WinMonitor>());
+			//auto nMonitor = SPtr<WinMonitor>(Construct<WinMonitor>());
+			auto nMonitor = ConstructShared<WinMonitor>();
 
 			WinMonitorConfig wmc;
 			wmc.SizeRect = monitor.SizeArea;
