@@ -100,6 +100,9 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 	m_ThreadID = CUR_THID();
 	m_TaskScheduler = desc.Scheduler;
+	m_Mode = desc.Mode;
+	m_State = desc.State;
+	m_ResizingEnabled = desc.ResizingEnabled;
 
 	// retrieve monitor
 	if (windowDesc.Monitor != nullptr)
@@ -115,8 +118,11 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	DWORD dwStyle = 0, dwStyleEx = 0;
 	m_Position.SetZero();
 
-	if (desc.Size.X <= 0 || desc.Size.Y <= 0)
-		desc.Size.Set(1280, 720);
+	if (desc.Size.X > 0 && desc.Size.Y > 0)
+		m_Size = desc.Size;
+	else
+		m_Size.Set(1280, 720);
+	
 
 	switch(desc.Mode)
 	{
@@ -137,7 +143,15 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 		desc.Mode = WindowMode_t::Windowed;
 	case WindowMode_t::Windowed:
 	{
-		dwStyle = WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		dwStyle = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+		if (m_ResizingEnabled)
+			dwStyle |= WS_THICKFRAME;
+
+		if (m_State == WindowState_t::Minimized)
+			dwStyle |= WS_ICONIC;
+		if (m_State == WindowState_t::Maximized)
+			dwStyle |= WS_MAXIMIZE;
+
 		dwStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 	}
 	}
@@ -183,7 +197,7 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 	m_WindowHandle = CreateWindowExW(dwStyleEx, gWindowClassID.data(), wTitle.c_str(),
 		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | dwStyle,
-		CW_USEDEFAULT, CW_USEDEFAULT, desc.Size.X, desc.Size.Y, parentWindow, nullptr, wc.hInstance, nullptr);
+		CW_USEDEFAULT, CW_USEDEFAULT, m_Size.X, m_Size.Y, parentWindow, nullptr, wc.hInstance, nullptr);
 
 	if (m_WindowHandle == nullptr)
 	{
@@ -209,9 +223,28 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	ChangeWindowMessageFilterEx(m_WindowHandle, WM_COPYDATA, MSGFLT_ALLOW, nullptr);
 	ChangeWindowMessageFilterEx(m_WindowHandle, WM_COPYGLOBALDATA, MSGFLT_ALLOW, nullptr);
 
-	::ShowWindow(m_WindowHandle, SW_SHOWNORMAL);
-	SetForegroundWindow(m_WindowHandle);
-	SetFocus(m_WindowHandle);
+	if (desc.StartVisible)
+	{
+		switch (m_State)
+		{
+		case WindowState_t::Maximized:
+			::ShowWindow(m_WindowHandle, SW_MAXIMIZE);
+			break;
+		case WindowState_t::Minimized:
+			::ShowWindow(m_WindowHandle, SW_MINIMIZE);
+			break;
+		default:
+			::ShowWindow(m_WindowHandle, SW_SHOWNORMAL);
+			SetForegroundWindow(m_WindowHandle);
+			break;
+		}
+	}
+
+	if (desc.StartFocused)
+	{
+		SetFocus(m_WindowHandle);
+	}
+	
 	UpdateWindow(m_WindowHandle);
 
 	
