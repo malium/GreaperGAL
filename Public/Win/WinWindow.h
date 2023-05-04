@@ -22,22 +22,23 @@ namespace greaper::gal
 	class WinWindow : public IWindow
 	{
 	public:
-		using MessageFn = std::function<LRESULT(WinWindow* window, WPARAM wParam, LPARAM lParam)>;
+		using MessageFn = std::function<LRESULT(WPARAM wParam, LPARAM lParam)>;
 
 	protected:
 		HWND m_WindowHandle;
 		HDC m_DC;
-		DWORD m_LastMessageID;
+		UINT m_LastMessageID;
+		mutable RWMutex m_MessageMutex;
 		Map<UINT, MessageFn> m_MessageMap;
 
-		INLINE EmptyResult _SetWinMessage(UINT messageID, MessageFn messageFn)noexcept
+		inline EmptyResult _SetWinMessage(UINT messageID, MessageFn messageFn)noexcept
 		{
 			if(messageFn == nullptr)
 				return Result::CreateFailure("WinWindow::SetWinMessage invalid messageFn function."sv);
 			m_MessageMap[messageID] = messageFn;
 			return Result::CreateSuccess();
 		}
-		INLINE EmptyResult _RemoveMessage(UINT messageID)noexcept
+		inline EmptyResult _RemoveMessage(UINT messageID)noexcept
 		{
 			const auto findIT = m_MessageMap.find(messageID);
 			if(findIT != m_MessageMap.end())
@@ -48,31 +49,26 @@ namespace greaper::gal
 			return Result::CreateFailure(Format("WinWindow::RemoveMessage couldn't find message id %d.", messageID));
 		}
 
-		virtual void SetDesc(const WindowDesc& desc)noexcept
-		{
-			
-		}
-
 	public:
 		virtual ~WinWindow()noexcept = default;
 
-		INLINE HWND GetOSHandle()const noexcept { SHAREDLOCK(m_Mutex); return m_WindowHandle; }
+		INLINE HWND GetOSHandle()const noexcept { return m_WindowHandle; }
 
-		INLINE HDC GetDC()const noexcept { SHAREDLOCK(m_Mutex); return m_DC; }
+		INLINE HDC GetDC()const noexcept { return m_DC; }
 		
 		INLINE EmptyResult SetWinMessage(UINT messageID, MessageFn messageFn)noexcept
 		{
-			LOCK(m_Mutex);
+			LOCK(m_MessageMutex);
 			return _SetWinMessage(messageID, std::move(messageFn));
 		}
 
 		INLINE EmptyResult RemoveMessage(UINT messageID)noexcept
 		{
-			LOCK(m_Mutex);
+			LOCK(m_MessageMutex);
 			return _RemoveMessage(messageID);
 		}
 
-		INLINE DWORD GetLastMessageID()const noexcept { SHAREDLOCK(m_Mutex); return m_LastMessageID; }
+		INLINE DWORD GetLastMessageID()const noexcept { return m_LastMessageID; }
 	};
 }
 

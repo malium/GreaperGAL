@@ -57,10 +57,6 @@ WM_DESTROY
 WM_NCDESTROY
 */
 
-#define ENSURE_WINDOW_THREAD()\
-VerifyEqual(CUR_THID(), m_ThreadID, "A window call must be done from the window thread.")
-
-
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	auto* wnd = reinterpret_cast<WinWindowImpl*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
@@ -70,13 +66,37 @@ static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
+LRESULT WinWindowImpl::WM_CLOSE_MSG(UNUSED WPARAM wParam, UNUSED LPARAM lParam)
+{
+	m_ShouldClose = true;
+	DestroyWindow(m_WindowHandle);
+	return 0;
+}
+
+LRESULT WinWindowImpl::WM_DESTROYQUIT_MSG(WPARAM wParam, LPARAM lParam)
+{
+	m_ShouldClose = true;
+	m_WindowHandle = nullptr;
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+}
+
+
+void greaper::gal::WinWindowImpl::AddWinMessages() noexcept
+{
+	LOCK(m_MessageMutex);
+#define SETMSG(command, function)\
+_SetWinMessage(command, [this](WPARAM wParam, LPARAM lParam) { return function(wParam, lParam); })
+
+	SETMSG(WM_CLOSE, WM_CLOSE_MSG);
+	SETMSG(WM_DESTROY, WM_DESTROYQUIT_MSG);
+	SETMSG(WM_QUIT, WM_DESTROYQUIT_MSG);
+
+#undef SETMSG
+}
+
 EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 {
-	// We are on window thread here
 	WinWindowDesc desc = (const WinWindowDesc&)windowDesc;
-//	return Result::CreateFailure("Not implemented"sv);
-
-	m_Mutex.lock(); // we don't want any modification except ours
 
 	m_ThreadID = CUR_THID();
 	m_TaskScheduler = desc.Scheduler;
@@ -148,7 +168,6 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 
 	if (regFailed)
 	{
-		m_Mutex.unlock();
 		const auto errCode = GetLastError();
 		return Result::CreateFailure(Format("RegisterClassExW failed with error code " I32_HEX_FMT ", error message '%S'.", errCode,
 			OSPlatform::GetLastErrorAsString(errCode).c_str()));
@@ -160,13 +179,14 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	if (desc.ParentWindow != nullptr)
 		parentWindow = ((SPtr<WinWindow>)desc.ParentWindow)->GetOSHandle();
 
+	AddWinMessages();
+
 	m_WindowHandle = CreateWindowExW(dwStyleEx, gWindowClassID.data(), wTitle.c_str(),
 		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | dwStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, desc.Size.X, desc.Size.Y, parentWindow, nullptr, wc.hInstance, nullptr);
 
 	if (m_WindowHandle == nullptr)
 	{
-		m_Mutex.unlock();
 		const auto errCode = GetLastError();
 		return Result::CreateFailure(Format("CreateWindowExW failed with code " I32_HEX_FMT ", error message '%S'.", errCode,
 			OSPlatform::GetLastErrorAsString(errCode).c_str()));
@@ -180,7 +200,6 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 		{
 			DestroyWindow(m_WindowHandle);
 			m_WindowHandle = nullptr;
-			m_Mutex.unlock();
 			return Result::CreateFailure(Format("SetWindowLongPtrW failed with code " I32_HEX_FMT ", error message '%S'.", errorCode,
 				OSPlatform::GetLastErrorAsString(errorCode).c_str()));
 		}
@@ -198,137 +217,157 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	
 	//DestroyWindow(m_WindowHandle);
 	//m_WindowHandle = nullptr;
-	m_Mutex.unlock();
 	//return Result::CreateFailure("Not implemented"sv);
 	return Result::CreateSuccess();
 }
 
-EmptyResult greaper::gal::WinWindowImpl::ChangeWindowSize(math::Vector2i size)
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowSize(math::Vector2i size)
 {
-	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(math::Vector2i size)
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowPosition(math::Vector2i size)
 {
-	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::WinWindowImpl::ChangeWindowPosition(AnchoredPosition_t anchor)
+TResult<String> greaper::gal::WinWindowImpl::_GetWindowTitle() const
 {
-	ENSURE_WINDOW_THREAD();
+	const auto lengthRtn = GetWindowTextLengthW(m_WindowHandle);
+	if (lengthRtn == 0)
+	{
+		const auto err = GetLastError();
+		if (err != 0)
+			return Result::CreateFailure<String>(Format("GetWindowTextLengthW failed, errorCode %" I32_HEX_FMT " errorMessage %S.", OSPlatform::GetLastErrorAsString(err).c_str()));
+	}
+	WString title;
+	title.resize(lengthRtn);
+	const auto rtn = GetWindowTextW(m_WindowHandle, title.data(), (int)title.size());
+	if (rtn == 0 && lengthRtn != rtn)
+	{
+		const auto err = GetLastError();
+		if (err != 0)
+			return Result::CreateFailure<String>(Format("GetWindowTextW failed, errorCode %" I32_HEX_FMT " errorMessage %S.", OSPlatform::GetLastErrorAsString(err).c_str()));
+	}
+	return Result::CreateSuccess(StringUtils::FromWIDE(title));
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowPositionAnchor(AnchoredPosition_t anchor)
+{
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::WinWindowImpl::SetWindowTitle(StringView title)
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowTitle(StringView title)
 {
-	ENSURE_WINDOW_THREAD();
-	SetWindowTextW(m_WindowHandle, StringUtils::ToWIDE(title).c_str());
+	auto rtn = SetWindowTextW(m_WindowHandle, StringUtils::ToWIDE(title).c_str());
+	if (rtn != 0)
+		return Result::CreateSuccess();
+	const auto err = GetLastError();
+	return Result::CreateFailure(Format("SetWindowTextW failed, errorCode %" I32_HEX_FMT " errorMessage %S.", OSPlatform::GetLastErrorAsString(err).c_str()));
 }
 
-EmptyResult greaper::gal::WinWindowImpl::ChangeWindowMode(WindowMode_t mode)
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowMode(WindowMode_t mode)
 {
-	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::WinWindowImpl::ChangeWindowState(WindowState_t state)
+EmptyResult greaper::gal::WinWindowImpl::_ChangeWindowState(WindowState_t state)
 {
-	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::WinWindowImpl::ShowWindow()
+EmptyResult greaper::gal::WinWindowImpl::_ShowWindow()
 {
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::HideWindow()
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::RequestFocus()
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::EnableResizing(bool enable)
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-void greaper::gal::WinWindowImpl::SetMinWindowSize(math::Vector2i minSize, bool changeCurrent)
-{
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-}
-
-String greaper::gal::WinWindowImpl::GetClipboardText() const
-{
-	ENSURE_WINDOW_THREAD();
-	return String();
-}
-
-EmptyResult greaper::gal::WinWindowImpl::SetClipboardText(StringView text)
-{
-	ENSURE_WINDOW_THREAD();
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-bool greaper::gal::WinWindowImpl::HasClipboardText()
+EmptyResult greaper::gal::WinWindowImpl::_HideWindow()
 {
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
-	return false;
+	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::WinWindowImpl::PollEvents()
+EmptyResult greaper::gal::WinWindowImpl::_RequestFocus()
 {
-	ENSURE_WINDOW_THREAD();
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_EnableResizing(bool enable)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_ChangeResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_ChangeMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_ChangeMinWindowSize(math::Vector2i minSize, bool changeCurrent)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_ChangeMonitor(PMonitor monitor)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+TResult<String> greaper::gal::WinWindowImpl::_GetClipboardText() const
+{
+	return Result::CreateFailure<String>("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_SetClipboardText(StringView text)const
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+TResult<bool> greaper::gal::WinWindowImpl::_HasClipboardText()const
+{
+	return Result::CreateFailure<bool>("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_PollEvents()const
+{
 	MSG msg;
 	while (PeekMessageW(&msg, m_WindowHandle, 0, 0, PM_REMOVE) != 0)
 	{
-		if (msg.message == WM_QUIT || msg.message == WM_CLOSE || msg.message == WM_DESTROY)
-		{
-			LOCK(m_Mutex);
-			m_ShouldClose = true;
-			break;
-		}
 		TranslateMessage(&msg);
 
 		DispatchMessageW(&msg);
 	}
-
+	return Result::CreateSuccess();
 }
 
-void greaper::gal::WinWindowImpl::SwapWindow()
+EmptyResult greaper::gal::WinWindowImpl::_WaitForEvents() const
 {
-	ENSURE_WINDOW_THREAD();
+	MSG msg;
+	auto msgRtn = GetMessageW(&msg, m_WindowHandle, 0, 0);
+	if (msgRtn > -1)
+	{
+		TranslateMessage(&msg);
+
+		DispatchMessageW(&msg);
+
+		return Result::CreateSuccess();
+	}
+	const auto err = GetLastError();
+	return Result::CreateFailure(Format("GetMessageW failed, errorCode %" I32_HEX_FMT " errorMessage %S.", OSPlatform::GetLastErrorAsString(err).c_str()));
+}
+
+EmptyResult greaper::gal::WinWindowImpl::_SwapWindow()const
+{
 	/* No-op */
+	return Result::CreateSuccess();
 }
 
-void greaper::gal::WinWindowImpl::CloseWindow()
+EmptyResult greaper::gal::WinWindowImpl::_CloseWindow()
 {
-	ENSURE_WINDOW_THREAD();
-	Break("Not implemented.");
+	return Result::CreateFailure("Not implemented"sv);
 }
 
 RenderBackend_t greaper::gal::WinWindowImpl::GetRenderBackend() const
@@ -341,22 +380,32 @@ LRESULT greaper::gal::WinWindowImpl::OnWindowProc(HWND hWnd, UINT uMsg, WPARAM w
 	//gGALLibrary->LogVerbose(Format("Message from window " I32_HEX_FMT " wParam %" PRIuPTR " lParam %" PRIiPTR, uMsg, wParam, lParam));
 
 
-	if (!m_ShouldClose)
+	//if (!m_ShouldClose)
+	//{
+	//	if (uMsg == WM_CLOSE)
+	//	{
+	//		LOCK(m_Mutex);
+	//		m_ShouldClose = true;
+	//		DestroyWindow(m_WindowHandle);
+	//		m_WindowHandle = nullptr;
+	//		return 0;
+	//	}
+	//	if (uMsg == WM_DESTROY || uMsg == WM_QUIT)
+	//	{
+	//		LOCK(m_Mutex);
+	//		m_ShouldClose = true;
+	//	}
+	//}
+	MessageFn* fn = nullptr;
 	{
-		if (uMsg == WM_CLOSE)
-		{
-			LOCK(m_Mutex);
-			m_ShouldClose = true;
-			DestroyWindow(m_WindowHandle);
-			m_WindowHandle = nullptr;
-			return 0;
-		}
-		if (uMsg == WM_DESTROY || uMsg == WM_QUIT)
-		{
-			LOCK(m_Mutex);
-			m_ShouldClose = true;
-		}
+		SHAREDLOCK(m_MessageMutex);
+		const auto it = m_MessageMap.find(uMsg);
+		if (it != m_MessageMap.end())
+			fn = &it->second;
+		m_LastMessageID = uMsg;
 	}
+	if (fn != nullptr)
+		return (*fn)(wParam, lParam);
 	
 	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }

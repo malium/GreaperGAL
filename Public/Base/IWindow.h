@@ -12,7 +12,7 @@
 #include "../../../GreaperCore/Public/Base/IThread.h"
 #include "../../../GreaperCore/Public/Event.h"
 #include "../../../GreaperMath/Public/Vector2.h"
-//#include "../../../GreaperCore/Public/SlimTaskScheduler.h"
+#include "../../../GreaperCore/Public/SlimTaskScheduler.h"
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
@@ -72,10 +72,8 @@ namespace greaper::gal
 		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
 
 	protected:
-		mutable RWMutex m_Mutex;
-		String m_Title;
 		math::Vector2i m_Size;
-		math::Vector2i m_DrawingSize;
+		math::Vector2i m_RenderSize;
 		math::Vector2i m_Position;
 		math::Vector2i m_ResizingRatio;
 		math::Vector2i m_MaxSize;
@@ -98,102 +96,156 @@ namespace greaper::gal
 		mutable WindowModeChangedEvent_t m_WindowModeChangedEvt;
 		mutable WindowStateChangedEvent_t m_WindowStateChangedEvt;
 
-		INLINE PGreaperLib GetGreaperLib()const noexcept
-		{
-			// "HACK" to get a GreaperLibrary to use it to log
-			const auto& wwndmgr = (const WInterface&)m_WindowManager;
-			VerifyNot(wwndmgr.expired(), "WindowManager expired!");
-			auto pwndmgr = wwndmgr.lock();
-			const auto& wlib = pwndmgr->GetLibrary();
-			VerifyNot(wlib.expired(), "GreaperLibrary expired!");
-			return wlib.lock();
-		}
-
 		virtual EmptyResult Create(const WindowDesc& windowDesc)noexcept = 0;
 
-		virtual void VerifyDesc(WindowDesc& windowDesc)const noexcept
-		{
-			auto plib = GetGreaperLib();
-			if(windowDesc.Size.X < 0 || windowDesc.Size.Y < 0)
-			{
-				plib->LogVerbose(Format("Verifying a WindwoDesc, Size has invalid values (%i, %i), changing them to (1280, 720).", windowDesc.Size.X, windowDesc.Size.Y));
-				windowDesc.Size.X = 1280;
-				windowDesc.Size.Y = 720;
-			}
-			
-			if(windowDesc.Position == AnchoredPosition_t::COUNT)
-			{
-				plib->LogVerbose(Format("Verifying a WindowDesc, Position is invalid '%s', changing it to Center.", TEnum<AnchoredPosition_t>::ToString(windowDesc.Position).data()));
-				windowDesc.Position = AnchoredPosition_t::Center;
-			}
-			
-			if(windowDesc.Mode == WindowMode_t::COUNT)
-			{
-				plib->LogVerbose(Format("Verifying a WindowDesc, Mode is invalid '%s', changing it to Windowed.", TEnum<WindowMode_t>::ToString(windowDesc.Mode).data()));
-				windowDesc.Mode = WindowMode_t::Windowed;
-			}
-
-			if(windowDesc.State == WindowState_t::COUNT)
-			{
-				plib->LogVerbose(Format("Verifying a WindowDesc, State is invalid '%s', changing it to Normal.", TEnum<WindowState_t>::ToString(windowDesc.State).data()));
-				windowDesc.State = WindowState_t::Normal;
-			}
-		}
+		virtual TResult<String> _GetWindowTitle()const = 0;
+		virtual EmptyResult _ChangeWindowPositionAnchor(AnchoredPosition_t anchor) = 0;
+		virtual EmptyResult _ChangeWindowPosition(math::Vector2i newPosition) = 0;
+		virtual EmptyResult _ChangeWindowSize(math::Vector2i newSize) = 0;
+		virtual EmptyResult _ChangeWindowTitle(StringView newTitle) = 0;
+		virtual EmptyResult _ChangeWindowMode(WindowMode_t newMode) = 0;
+		virtual EmptyResult _ChangeWindowState(WindowState_t newState) = 0;
+		virtual EmptyResult _ShowWindow() = 0;
+		virtual EmptyResult _HideWindow() = 0;
+		virtual EmptyResult _RequestFocus() = 0;
+		virtual EmptyResult _EnableResizing(bool enable) = 0;
+		virtual EmptyResult _ChangeResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent) = 0;
+		virtual EmptyResult _ChangeMaxWindowSize(math::Vector2i maxSize, bool changeCurrent) = 0;
+		virtual EmptyResult _ChangeMinWindowSize(math::Vector2i minSize, bool changeCurrent) = 0;
+		virtual EmptyResult _ChangeMonitor(PMonitor monitor) = 0;
+		virtual TResult<bool> _HasClipboardText()const = 0;
+		virtual TResult<String> _GetClipboardText()const = 0;
+		virtual EmptyResult _SetClipboardText(StringView text)const = 0;
+		virtual EmptyResult _PollEvents()const = 0;
+		virtual EmptyResult _WaitForEvents()const = 0;
+		virtual EmptyResult _SwapWindow()const = 0;
+		virtual EmptyResult _CloseWindow() = 0;
 
 	public:
 		IWindow()noexcept = default;
 		virtual ~IWindow() = default;
 
-		INLINE math::Vector2i GetWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_Size; }
-		virtual EmptyResult ChangeWindowSize(math::Vector2i size) = 0;
-		INLINE math::Vector2i GetWindowDrawingSize()const noexcept { SHAREDLOCK(m_Mutex); return m_DrawingSize; }
+#define WNDGETFN(fnName, outputType, wndField)\
+		inline TResult<outputType> fnName()const noexcept{\
+			if (CUR_THID() != m_ThreadID){\
+				outputType output{};\
+				auto res = m_TaskScheduler->AddTask([&output, this]() { output = wndField; });\
+				if (res.HasFailed()) return Result::CopyFailure<outputType>(res);\
+				m_TaskScheduler->WaitUntilTaskFinished(res.GetValue());\
+				return Result::CreateSuccess(output);}\
+			return Result::CreateSuccess(wndField);}\
+
+#define WNDGETFNX(fnName, outputType)\
+		inline TResult<outputType> fnName()const noexcept{\
+			if (CUR_THID() != m_ThreadID){\
+				TResult<outputType> output;\
+				auto res = m_TaskScheduler->AddTask([&output, this]() { output = _##fnName(); });\
+				if (res.HasFailed()) return Result::CopyFailure<outputType>(res);\
+				m_TaskScheduler->WaitUntilTaskFinished(res.GetValue());\
+				return output;}\
+			return _##fnName();}
+
+#define WNDSETFN(fnName, inputType, inputName)\
+		inline EmptyResult fnName(inputType inputName)noexcept{\
+			if (CUR_THID() != m_ThreadID){\
+				auto res = m_TaskScheduler->AddTask([&inputName, this]() { _##fnName(inputName); });\
+				if (res.HasFailed()) return Result::CopyFailure(res); \
+				m_TaskScheduler->WaitUntilTaskFinished(res.GetValue());\
+				return Result::CreateSuccess();}\
+			return _##fnName(inputName);}
+
+#define WNDSETFN2(fnName, inputType, inputName, inputType2, inputName2)\
+		inline EmptyResult fnName(inputType inputName, inputType2 inputName2)noexcept{\
+			if (CUR_THID() != m_ThreadID){\
+				auto res = m_TaskScheduler->AddTask([&inputName, &inputName2, this]() { _##fnName(inputName, inputName2); });\
+				if (res.HasFailed()) return Result::CopyFailure(res); \
+				m_TaskScheduler->WaitUntilTaskFinished(res.GetValue());\
+				return Result::CreateSuccess();}\
+			return _##fnName(inputName, inputName2);}
+
+#define WNDCALLFN(fnName)\
+		inline EmptyResult fnName()noexcept{\
+			if (CUR_THID() != m_ThreadID){\
+				EmptyResult result;\
+				auto res = m_TaskScheduler->AddTask([&result, this]() { result = _##fnName(); });\
+				if (res.HasFailed()) return Result::CopyFailure(res);\
+				m_TaskScheduler->WaitUntilTaskFinished(res.GetValue());\
+				return result;}\
+			return _##fnName();}
+
+
+		WNDGETFN(GetWindowSize, math::Vector2i, m_Size);
+		WNDSETFN(ChangeWindowSize, math::Vector2i, newSize);
 		
-		INLINE math::Vector2i GetWindowPosition()const noexcept { SHAREDLOCK(m_Mutex); return m_Position; }
-		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
-		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
-
-		INLINE const String& GetWindowTitle()const noexcept { SHAREDLOCK(m_Mutex); return m_Title; }
-		virtual void SetWindowTitle(StringView title) = 0;
-
-		INLINE WindowMode_t GetWindowMode()const noexcept { SHAREDLOCK(m_Mutex); return m_Mode; }
-		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;
-
-		INLINE WindowState_t GetWindowState()const noexcept { SHAREDLOCK(m_Mutex); return m_State; }
-		virtual EmptyResult ChangeWindowState(WindowState_t state) = 0;
-
-		virtual void ShowWindow() = 0;
-		virtual void HideWindow() = 0;
-		INLINE bool IsWindowShown()const noexcept { SHAREDLOCK(m_Mutex); return m_IsVisible; }
-
-		INLINE bool IsWindowFocused()const noexcept { SHAREDLOCK(m_Mutex); return m_HasFocus; }
-		virtual void RequestFocus() = 0;
-
-		INLINE bool IsResizingEnabled()const noexcept { SHAREDLOCK(m_Mutex); return m_ResizingEnabled; }
-		virtual void EnableResizing(bool enable) = 0;
-
-		virtual void SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent = false) = 0;
-		INLINE math::Vector2i GetResizingAspectRatio()const noexcept { SHAREDLOCK(m_Mutex); return m_ResizingRatio; }
-		INLINE bool IsResizingAspectRatioEnabled()const noexcept { auto ratio = GetResizingAspectRatio(); return ratio.X > 0 && ratio.Y > 0; }
-
-		virtual void SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent = false) = 0;
-		INLINE math::Vector2i GetMaxWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_MaxSize; }
-		INLINE bool IsMaxWindowSizeEnabled()const noexcept { auto maxSize = GetMaxWindowSize(); return maxSize.X > 0 && maxSize.Y > 0; }
+		WNDGETFN(GetRenderSize, math::Vector2i, m_RenderSize);
 		
-		virtual void SetMinWindowSize(math::Vector2i minSize, bool changeCurrent = false) = 0;
-		INLINE math::Vector2i GetMinWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_MinSize; }
-		INLINE bool IsMinWindowSizeEnabled()const noexcept { auto minSize = GetMinWindowSize(); return minSize.X > 0 && minSize.Y > 0; }
+		WNDGETFN(GetWindowPosition, math::Vector2i, m_Position);
+		WNDSETFN(ChangeWindowPosition, math::Vector2i, newPosition);
+		WNDSETFN(ChangeWindowPositionAnchor, AnchoredPosition_t, anchor);
 
-		INLINE PMonitor GetCurrentMonitor()const noexcept { SHAREDLOCK(m_Mutex); return m_CurrentMonitor; }
+		WNDGETFNX(GetWindowTitle, String);
+		WNDSETFN(ChangeWindowTitle, StringView, title);
 
-		virtual String GetClipboardText()const = 0;
-		virtual EmptyResult SetClipboardText(StringView text) = 0;
-		virtual bool HasClipboardText() = 0;
+		WNDGETFN(GetWindowMode, WindowMode_t, m_Mode);
+		WNDSETFN(ChangeWindowMode, WindowMode_t, newMode);
 
-		virtual void PollEvents() = 0;
-		virtual void SwapWindow() = 0;
+		WNDGETFN(GetWindowState, WindowState_t, m_State);
+		WNDSETFN(ChangeWindowState, WindowState_t, newState);
 
-		INLINE bool ShouldClose()const noexcept { SHAREDLOCK(m_Mutex); return m_ShouldClose; }
-		virtual void CloseWindow() = 0;
+		WNDCALLFN(ShowWindow);
+		WNDCALLFN(HideWindow);
+		WNDGETFN(IsWindowShown, bool, m_IsVisible);
+
+		WNDGETFN(IsWindowFocused, bool, m_HasFocus);
+		WNDCALLFN(RequestFocus);
+
+		WNDGETFN(ResizingEnabled, bool, m_ResizingEnabled);
+		WNDSETFN(EnableResizing, bool, enable);
+
+		WNDSETFN2(ChangeResizingAspectRatio, math::Vector2i, aspectRatio, bool, changeCurrent);
+		WNDGETFN(GetResizingAspectRatio, math::Vector2i, m_ResizingRatio);
+		INLINE TResult<bool> IsResizingAspectRatioEnabled()const noexcept
+		{
+			auto ratioRes = GetResizingAspectRatio();
+			if (ratioRes.HasFailed())
+				return Result::CopyFailure<bool>(ratioRes);
+			const auto& ratio = ratioRes.GetValue();
+			return Result::CreateSuccess(ratio.X > 0 && ratio.Y > 0);
+		}
+
+		WNDSETFN2(ChangeMaxWindowSize, math::Vector2i, maxSize, bool, changecurrent);
+		WNDGETFN(GetMaxWindowSize, math::Vector2i, m_MaxSize);
+		INLINE TResult<bool> IsMaxWindowSizeEnabled()const noexcept
+		{
+			auto maxSizeRes = GetMaxWindowSize();
+			if (maxSizeRes.HasFailed())
+				return Result::CopyFailure<bool>(maxSizeRes);
+			const auto& maxSize = maxSizeRes.GetValue();
+			return Result::CreateSuccess(maxSize.X > 0 && maxSize.Y > 0);
+		}
+		
+		WNDSETFN2(ChangeMinWindowSize, math::Vector2i, minSize, bool, changecurrent);
+		WNDGETFN(GetMinWindowSize, math::Vector2i, m_MinSize);
+		INLINE TResult<bool> IsMinWindowSizeEnabled()const noexcept
+		{
+			auto minSizeRes = GetMinWindowSize();
+			if (minSizeRes.HasFailed())
+				return Result::CopyFailure<bool>(minSizeRes);
+			const auto& minSize = minSizeRes.GetValue();
+			return Result::CreateSuccess(minSize.X > 0 && minSize.Y > 0);
+		}
+
+		WNDGETFN(GetCurrentMonitor, PMonitor, m_CurrentMonitor);
+
+		WNDGETFNX(GetClipboardText, String);
+		WNDSETFN(SetClipboardText, StringView, text);
+		WNDGETFNX(HasClipboardText, bool);
+
+		WNDCALLFN(PollEvents);
+		WNDCALLFN(SwapWindow);
+
+		WNDGETFN(ShouldClose, bool, m_ShouldClose);
+		WNDCALLFN(CloseWindow);
 
 		virtual RenderBackend_t GetRenderBackend()const = 0;
 
@@ -206,6 +258,12 @@ namespace greaper::gal
 		INLINE WindowResizedEvent_t& GetResizedEvent()const noexcept { return m_WindowResizedEvt; }
 		INLINE WindowModeChangedEvent_t& GetModeChangedEvent()const noexcept { return m_WindowModeChangedEvt; }
 		INLINE WindowStateChangedEvent_t& GetStateChangedEvent()const noexcept { return m_WindowStateChangedEvt; }
+
+#undef WNDGETFN
+#undef WNDGETFNX
+#undef WNDSETFN
+#undef WNDSETFN2
+#undef WNDCALLFN
 	};
 }
 

@@ -15,28 +15,31 @@ namespace greaper::gal
 	{
 	public:
 		EmptyResult Create(const WindowDesc& windowDesc)noexcept override;
+		
+		RenderBackend_t GetRenderBackend() const override { return RenderBackend_t::OpenGL; }
 
-		// Inherited via GLWinWindow
-		EmptyResult ChangeWindowSize(math::Vector2i size) override;
-		EmptyResult ChangeWindowPosition(math::Vector2i size) override;
-		EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) override;
-		void SetWindowTitle(StringView title) override;
-		EmptyResult ChangeWindowMode(WindowMode_t mode) override;
-		EmptyResult ChangeWindowState(WindowState_t state) override;
-		void ShowWindow() override;
-		void HideWindow() override;
-		void RequestFocus() override;
-		void EnableResizing(bool enable) override;
-		void SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent) override;
-		void SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent) override;
-		void SetMinWindowSize(math::Vector2i minSize, bool changeCurrent) override;
-		String GetClipboardText() const override;
-		EmptyResult SetClipboardText(StringView text) override;
-		bool HasClipboardText() override;
-		void PollEvents()override;
-		void SwapWindow() override;
-		void CloseWindow() override;
-		RenderBackend_t GetRenderBackend() const override;
+		virtual TResult<String> _GetWindowTitle() const override;
+		virtual EmptyResult _ChangeWindowPositionAnchor(AnchoredPosition_t anchor) override;
+		virtual EmptyResult _ChangeWindowPosition(math::Vector2i newPosition) override;
+		virtual EmptyResult _ChangeWindowSize(math::Vector2i newSize) override;
+		virtual EmptyResult _ChangeWindowTitle(StringView newTitle) override;
+		virtual EmptyResult _ChangeWindowMode(WindowMode_t newMode) override;
+		virtual EmptyResult _ChangeWindowState(WindowState_t newState) override;
+		virtual EmptyResult _ShowWindow() override;
+		virtual EmptyResult _HideWindow() override;
+		virtual EmptyResult _RequestFocus() override;
+		virtual EmptyResult _EnableResizing(bool enable) override;
+		virtual EmptyResult _ChangeResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent) override;
+		virtual EmptyResult _ChangeMaxWindowSize(math::Vector2i maxSize, bool changeCurrent) override;
+		virtual EmptyResult _ChangeMinWindowSize(math::Vector2i minSize, bool changeCurrent) override;
+		virtual EmptyResult _ChangeMonitor(PMonitor monitor) override;
+		virtual TResult<bool> _HasClipboardText() const override;
+		virtual TResult<String> _GetClipboardText() const override;
+		virtual EmptyResult _SetClipboardText(StringView text) const override;
+		virtual EmptyResult _PollEvents() const override;
+		virtual EmptyResult _WaitForEvents() const override;
+		virtual EmptyResult _SwapWindow() const override;
+		virtual EmptyResult _CloseWindow() override;
 	};
 }
 

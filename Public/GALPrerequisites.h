@@ -19,19 +19,30 @@
 namespace greaper::gal
 {
 	class IWindowManager; using PWindowManager = SPtr<IWindowManager>; using WWindowManager = WPtr<IWindowManager>;
-	class IWindow; using PWindow = SPtr<IWindow>; using WWindow = WPtr<IWindow>;
+	class IWindow;
+	struct IWindowDesc;
+	using PWindow = SPtr<IWindow>; using WWindow = WPtr<IWindow>;
 
-	struct WindowDesc;
 #if PLT_WINDOWS
+	class WinWindow;
 	struct WinWindowDesc;
+	class GLWinWindow;
 	struct GLWinWindowDesc;
+	class VkWinWindow;
 	struct VkWinWindowDesc;
 #elif PLT_LINUX
+	struct LnxWindowDesc;
+	class X11Window;
 	struct X11WindowDesc;
+	class WLWindow;
 	struct WLWindowDesc;
+	class GLX11Window;
 	struct GLX11WindowDesc;
+	class GLWLWindow;
 	struct GLWLWindowDesc;
+	class VkX11Window;
 	struct VkX11WindowDesc;
+	class VkWLWindow;
 	struct VkWLWindowDesc;
 #endif
 

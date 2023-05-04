@@ -86,7 +86,7 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	}
 }
 
-void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
+void WindowManager::OnDeactivation(UNUSED const PInterface& newDefault) noexcept
 {
 	m_Monitors.clear();
 }

@@ -16,104 +16,112 @@ EmptyResult VkWinWindowImpl::Create(const WindowDesc& windowDesc) noexcept
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::VkWinWindowImpl::ChangeWindowSize(math::Vector2i size)
+TResult<String> greaper::gal::VkWinWindowImpl::_GetWindowTitle() const
+{
+	return Result::CreateFailure<String>("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowPositionAnchor(AnchoredPosition_t anchor)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::VkWinWindowImpl::ChangeWindowPosition(math::Vector2i size)
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowPosition(math::Vector2i newPosition)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::VkWinWindowImpl::ChangeWindowPosition(AnchoredPosition_t anchor)
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowSize(math::Vector2i newSize)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::VkWinWindowImpl::SetWindowTitle(StringView title)
-{
-	Break("Not implemented.");
-}
-
-EmptyResult greaper::gal::VkWinWindowImpl::ChangeWindowMode(WindowMode_t mode)
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowTitle(StringView newTitle)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-EmptyResult greaper::gal::VkWinWindowImpl::ChangeWindowState(WindowState_t state)
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowMode(WindowMode_t newMode)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::VkWinWindowImpl::ShowWindow()
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::HideWindow()
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::RequestFocus()
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::EnableResizing(bool enable)
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
-{
-	Break("Not implemented.");
-}
-
-void greaper::gal::VkWinWindowImpl::SetMinWindowSize(math::Vector2i minSize, bool changeCurrent)
-{
-	Break("Not implemented.");
-}
-
-String greaper::gal::VkWinWindowImpl::GetClipboardText() const
-{
-	Break("Not implemented.");
-	return String();
-}
-
-EmptyResult greaper::gal::VkWinWindowImpl::SetClipboardText(StringView text)
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeWindowState(WindowState_t newState)
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
 
-bool greaper::gal::VkWinWindowImpl::HasClipboardText()
+EmptyResult greaper::gal::VkWinWindowImpl::_ShowWindow()
 {
-	Break("Not implemented.");
-	return false;
+	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::VkWinWindowImpl::PollEvents()
+EmptyResult greaper::gal::VkWinWindowImpl::_HideWindow()
 {
-	Break("Not implemented.");
+	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::VkWinWindowImpl::SwapWindow()
+EmptyResult greaper::gal::VkWinWindowImpl::_RequestFocus()
 {
-	Break("Not implemented.");
+	return Result::CreateFailure("Not implemented"sv);
 }
 
-void greaper::gal::VkWinWindowImpl::CloseWindow()
+EmptyResult greaper::gal::VkWinWindowImpl::_EnableResizing(bool enable)
 {
-	Break("Not implemented.");
+	return Result::CreateFailure("Not implemented"sv);
 }
 
-RenderBackend_t greaper::gal::VkWinWindowImpl::GetRenderBackend() const
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent)
 {
-	return RenderBackend_t::Vulkan;
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeMaxWindowSize(math::Vector2i maxSize, bool changeCurrent)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeMinWindowSize(math::Vector2i minSize, bool changeCurrent)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_ChangeMonitor(PMonitor monitor)
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+TResult<bool> greaper::gal::VkWinWindowImpl::_HasClipboardText() const
+{
+	return Result::CreateFailure<bool>("Not implemented"sv);
+}
+
+TResult<String> greaper::gal::VkWinWindowImpl::_GetClipboardText() const
+{
+	return Result::CreateFailure<String>("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_SetClipboardText(StringView text) const
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_PollEvents() const
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_WaitForEvents() const
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_SwapWindow() const
+{
+	return Result::CreateFailure("Not implemented"sv);
+}
+
+EmptyResult greaper::gal::VkWinWindowImpl::_CloseWindow()
+{
+	return Result::CreateFailure("Not implemented"sv);
 }
