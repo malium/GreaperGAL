@@ -65,11 +65,11 @@ namespace greaper::gal
 	{
 	public:
 		// These events are triggered only by the connected window
-		using WindowClosingEvent_t = Event<const PWindow&>;
-		using WindowMovedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
-		using WindowResizedEvent_t = Event<const PWindow&, math::Vector2i, math::Vector2i>;
-		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
-		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
+		using WindowClosingEvent_t = Event<const PWindow& /* Window */>;
+		using WindowMovedEvent_t = Event<const PWindow& /* Window */, math::Vector2i /* old */, math::Vector2i /* new */>;
+		using WindowResizedEvent_t = Event<const PWindow& /* Window */, math::Vector2i /* old */, math::Vector2i /* new */>;
+		using WindowModeChangedEvent_t = Event<const PWindow& /* Window */, WindowMode_t /* old */, WindowMode_t /* new */>;
+		using WindowStateChangedEvent_t = Event<const PWindow& /* Window */, WindowState_t /* old */, WindowState_t /* new */>;
 
 	protected:
 		math::Vector2i m_Size;

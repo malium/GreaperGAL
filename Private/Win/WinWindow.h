@@ -16,7 +16,12 @@ namespace greaper::gal
 		void AddWinMessages()noexcept;
 
 		LRESULT WM_CLOSE_MSG(UNUSED WPARAM wParam, UNUSED LPARAM lParam);
-		LRESULT WM_DESTROYQUIT_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_DESTROY_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_SHOWWINDOW_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_SIZE_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_ENABLE_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_MOVE_MSG(WPARAM wParam, LPARAM lParam);
+		LRESULT WM_ACTIVATEAPP_MSG(WPARAM wParam, LPARAM lParam);
 
 		TResult<String> _GetWindowTitle() const override;
 		EmptyResult _ChangeWindowPositionAnchor(AnchoredPosition_t anchor) override;

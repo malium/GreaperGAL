@@ -57,6 +57,14 @@ WM_DESTROY
 WM_NCDESTROY
 */
 
+#define DEBUG_WM_CLOSE TRUE
+#define DEBUG_WM_DESTROY TRUE
+#define DEBUG_WM_SIZE TRUE
+#define DEBUG_WM_SHOWWINDOW TRUE
+#define DEBUG_WM_ENABLE TRUE
+#define DEBUG_WM_MOVE TRUE
+#define DEBUG_WM_ACTIVATEAPP TRUE
+
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	auto* wnd = reinterpret_cast<WinWindowImpl*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
@@ -68,18 +76,119 @@ static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 LRESULT WinWindowImpl::WM_CLOSE_MSG(UNUSED WPARAM wParam, UNUSED LPARAM lParam)
 {
+#if DEBUG_WM_CLOSE
+	printf_s("WM_CLOSE\n");
+#endif
 	m_ShouldClose = true;
 	DestroyWindow(m_WindowHandle);
 	return 0;
 }
 
-LRESULT WinWindowImpl::WM_DESTROYQUIT_MSG(WPARAM wParam, LPARAM lParam)
+LRESULT WinWindowImpl::WM_DESTROY_MSG(WPARAM wParam, LPARAM lParam)
 {
+#if DEBUG_WM_CLOSE
+	printf_s("WM_DESTROY\n");
+#endif
 	m_ShouldClose = true;
 	m_WindowHandle = nullptr;
 	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
 }
 
+LRESULT greaper::gal::WinWindowImpl::WM_SHOWWINDOW_MSG(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
+	case TRUE:
+		printf_s("WM_SHOWWINDOW TRUE\n");
+		break;
+	case FALSE:
+		printf_s("WM_SHOWWINDOW FALSE\n");
+		break;
+	default:
+		printf_s("WM_SHOWWINDOW UNKNOWN\n");
+		break;
+	}
+
+	switch (lParam)
+	{
+	case SW_OTHERUNZOOM:
+		printf_s("WM_SHOWWINDOW - SW_OTHERUNZOOM uncovered because a maximize window was restored or minimized\n");
+		break;
+	case SW_OTHERZOOM:
+		printf_s("WM_SHOWWINDOW - SW_OTHERZOOM covered by another window that has been maximized\n");
+		break;
+	case SW_PARENTCLOSING:
+		printf_s("WM_SHOWWINDOW - SW_PARENTCLOSING window's owner window is being minimized\n");
+		break;
+	case SW_PARENTOPENING:
+		printf_s("WM_SHOWWINDOW - SW_PARENTOPENING window's owner window is being restored\n");
+	}
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+}
+
+LRESULT greaper::gal::WinWindowImpl::WM_SIZE_MSG(WPARAM wParam, LPARAM lParam)
+{
+#if DEBUG_WM_SIZE
+#define PRINT(...) printf(__VA_ARGS__)
+#else
+#define PRINT(...)
+#endif
+	auto oldState = m_State;
+	switch (wParam)
+	{
+	case SIZE_MAXHIDE:
+		PRINT("WM_SIZE - SIZE_MAXHIDE Message is sent to all pop-up windows when some other window is maximized\n");
+		break;
+	case SIZE_MAXIMIZED:
+		PRINT("WM_SIZE - SIZE_MAXIMIZED The window has been maximized\n");
+		m_State = WindowState_t::Maximized;
+		break;
+	case SIZE_MAXSHOW:
+		PRINT("WM_SIZE - SIZE_MAXSHOW Message is sent to all pop-up windows when some other window has been restored to its former size\n");
+		break;
+	case SIZE_MINIMIZED:
+		PRINT("WM_SIZE - SIZE_MINIMIZED The window has been minimized\n");
+		m_State = WindowState_t::Minimized;
+		break;
+	case SIZE_RESTORED:
+		PRINT("WM_SIZE - SIZE_RESTORED The window has been resized, but neither the SIZE_MINIMIZED nor SIZE_MAXIMIZED value applies\n");
+		m_State = WindowState_t::Normal;
+		break;
+	}
+
+	if (oldState != m_State)
+		m_WindowStateChangedEvt.Trigger(m_This, m_State, WindowState_t::Maximized);
+	
+	m_RenderSize.Set(LOWORD(lParam), HIWORD(lParam));
+	PRINT("New client size (%dx%d)\n", m_RenderSize.X, m_RenderSize.Y);
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+
+#undef PRINT
+}
+
+LRESULT greaper::gal::WinWindowImpl::WM_ENABLE_MSG(WPARAM wParam, LPARAM lParam)
+{
+	printf_s("WM_ENABLE %s\n", wParam == TRUE ? "TRUE" : "FALSE");
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+}
+
+LRESULT greaper::gal::WinWindowImpl::WM_MOVE_MSG(WPARAM wParam, LPARAM lParam)
+{
+	m_Position.Set((int32)(int16)LOWORD(lParam), (int32)(int16)HIWORD(lParam));
+#if DEBUG_WM_MOVE
+	printf_s("WM_MOVE (%d, %d)\n", m_Position.X, m_Position.Y);
+#endif
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+}
+
+LRESULT greaper::gal::WinWindowImpl::WM_ACTIVATEAPP_MSG(WPARAM wParam, LPARAM lParam)
+{
+	m_HasFocus = wParam == TRUE;
+#if DEBUG_WM_ACTIVATEAPP
+	printf_s("WM_ACTIVATEAPP %s\n", m_HasFocus ? "TRUE" : "FALSE");
+#endif
+	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
+}
 
 void greaper::gal::WinWindowImpl::AddWinMessages() noexcept
 {
@@ -88,8 +197,17 @@ void greaper::gal::WinWindowImpl::AddWinMessages() noexcept
 _SetWinMessage(command, [this](WPARAM wParam, LPARAM lParam) { return function(wParam, lParam); })
 
 	SETMSG(WM_CLOSE, WM_CLOSE_MSG);
-	SETMSG(WM_DESTROY, WM_DESTROYQUIT_MSG);
-	SETMSG(WM_QUIT, WM_DESTROYQUIT_MSG);
+	SETMSG(WM_DESTROY, WM_DESTROY_MSG);
+#if DEBUG_WM_SHOWWINDOW
+	SETMSG(WM_SHOWWINDOW, WM_SHOWWINDOW_MSG);
+#endif
+#if DEBUG_WM_ENABLE
+	SETMSG(WM_ENABLE, WM_ENABLE_MSG);
+#endif
+	SETMSG(WM_SIZE, WM_SIZE_MSG);
+	SETMSG(WM_MOVE, WM_MOVE_MSG);
+	SETMSG(WM_ACTIVATEAPP, WM_ACTIVATEAPP_MSG);
+
 
 #undef SETMSG
 }
@@ -229,6 +347,7 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 		{
 		case WindowState_t::Maximized:
 			::ShowWindow(m_WindowHandle, SW_MAXIMIZE);
+			SetForegroundWindow(m_WindowHandle);
 			break;
 		case WindowState_t::Minimized:
 			::ShowWindow(m_WindowHandle, SW_MINIMIZE);
