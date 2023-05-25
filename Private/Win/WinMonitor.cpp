@@ -122,6 +122,27 @@ static BOOL CALLBACK MonitorQuery(HMONITOR hMonitor, UNUSED HDC hDC, UNUSED LPRE
 	case WindowsVersion_t::Windows81:
 	case WindowsVersion_t::Windows10:
 	{
+#if NTDDI_VERSION < NTDDI_WINBLUE
+		Library shcoreLib{ L"Shcore.dll"sv };
+		if (!shcoreLib.IsOpen())
+		{
+			gGALLibrary->LogWarning("Couldn't open Shcore.dll library.");
+			return true;
+		}
+		auto getFnRes = shcoreLib.GetFunction("GetDpiForMonitor"sv);
+		if (getFnRes.HasFailed())
+		{
+			gGALLibrary->LogWarning("Couldn't obtain GetDpiForMonitor from Shcore.dll library.");
+			return true;
+		}
+		using PROCGETDPIFORMONITOR = HRESULT(STDCALL*)(
+			HMONITOR hmonitor,
+			MONITOR_DPI_TYPE dpiType,
+			UINT* dpiX,
+			UINT* dpiY);
+			
+		auto GetDpiForMonitor = reinterpret_cast<PROCGETDPIFORMONITOR>(getFnRes.GetValue());
+#endif
 		auto hRes = GetDpiForMonitor(hMonitor, MDT_DEFAULT, &dpix, &dpiy);
 		if (hRes == E_INVALIDARG)
 		{

@@ -26,7 +26,6 @@ namespace greaper::gal
 
 	protected:
 		HWND m_WindowHandle;
-		HDC m_DC;
 		UINT m_LastMessageID;
 		mutable RWMutex m_MessageMutex;
 		Map<UINT, MessageFn> m_MessageMap;
@@ -54,8 +53,11 @@ namespace greaper::gal
 
 		INLINE HWND GetOSHandle()const noexcept { return m_WindowHandle; }
 
-		INLINE HDC GetDC()const noexcept { return m_DC; }
-		
+		INLINE SPtr<std::remove_pointer_t<HDC>> GetDC()const noexcept
+		{
+			return SPtr<std::remove_pointer_t<HDC>>(::GetDC(m_WindowHandle), [hWnd = m_WindowHandle](HDC hDC) { ::ReleaseDC(hWnd, hDC); });
+		}
+
 		INLINE EmptyResult SetWinMessage(UINT messageID, MessageFn messageFn)noexcept
 		{
 			LOCK(m_MessageMutex);

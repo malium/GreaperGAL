@@ -221,7 +221,7 @@ namespace greaper::gal
 			if (maxSizeRes.HasFailed())
 				return Result::CopyFailure<bool>(maxSizeRes);
 			const auto& maxSize = maxSizeRes.GetValue();
-			return Result::CreateSuccess(maxSize.X > 0 && maxSize.Y > 0);
+			return Result::CreateSuccess(maxSize.X > 0 || maxSize.Y > 0);
 		}
 		
 		WNDSETFN2(ChangeMinWindowSize, math::Vector2i, minSize, bool, changecurrent);
@@ -232,7 +232,7 @@ namespace greaper::gal
 			if (minSizeRes.HasFailed())
 				return Result::CopyFailure<bool>(minSizeRes);
 			const auto& minSize = minSizeRes.GetValue();
-			return Result::CreateSuccess(minSize.X > 0 && minSize.Y > 0);
+			return Result::CreateSuccess(minSize.X > 0 || minSize.Y > 0);
 		}
 
 		WNDGETFN(GetCurrentMonitor, PMonitor, m_CurrentMonitor);

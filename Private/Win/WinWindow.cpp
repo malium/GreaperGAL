@@ -20,43 +20,6 @@ extern SPtr<GreaperGALLibrary> gGALLibrary;
 
 static constexpr WStringView gWindowClassID = L"GreaperWindow"sv;
 
-/*
-Message order:
-WM_GETMINMAXINFO
-WM_NCCREATE
-WM_NCCALCSIZE
-WM_CREATE
-WM_SHOWWINDOW
-WM_WINDOWPOSCHANGING
-WM_WINDOWPOSCHANGING
-WM_ACTIVATEAPP
-WM_NCACTIVATE
-WM_GETICON
-WM_GETICON
-WM_GETICON
-WM_ACTIVATE
-WM_IME_SETCONTEXT
-WM_IME_NOTIFY
-WM_SETFOCUS
-WM_NCPAINT
-WM_ERASEBKGND
-WM_WINDOWPOSCHANGED
-WM_SIZE
-WM_MOVE
-WM_PAINT
-0x0090
-WM_WINDOWPOSCHANGING
-WM_WINDOWPOSCHANGED
-WM_NCACTIVATE
-WM_ACTIVATE
-WM_ACTIVATEAPP
-WM_KILLFOCUS
-WM_IME_SETCONTEXT
-WM_IME_NOTIFY
-WM_DESTROY
-WM_NCDESTROY
-*/
-
 #define DEBUG_WM_CLOSE TRUE
 #define DEBUG_WM_DESTROY TRUE
 #define DEBUG_WM_SIZE TRUE
@@ -68,10 +31,10 @@ WM_NCDESTROY
 static LRESULT CALLBACK WindowMessageProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	auto* wnd = reinterpret_cast<WinWindowImpl*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
-	if (wnd != nullptr)
-		return wnd->OnWindowProc(hWnd, uMsg, wParam, lParam);
 
-	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+	return (wnd != nullptr) ? 
+		wnd->OnWindowProc(hWnd, uMsg, wParam, lParam) : 
+		DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
 LRESULT WinWindowImpl::WM_CLOSE_MSG(UNUSED WPARAM wParam, UNUSED LPARAM lParam)
@@ -157,9 +120,15 @@ LRESULT greaper::gal::WinWindowImpl::WM_SIZE_MSG(WPARAM wParam, LPARAM lParam)
 	}
 
 	if (oldState != m_State)
+	{
+		if (oldState == WindowState_t::Minimized)
+			m_IsVisible = true;
+		if (m_State == WindowState_t::Minimized)
+			m_IsVisible = false;
 		m_WindowStateChangedEvt.Trigger(m_This, m_State, WindowState_t::Maximized);
+	}
 	
-	m_RenderSize.Set(LOWORD(lParam), HIWORD(lParam));
+	m_RenderSize.Set(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 	PRINT("New client size (%dx%d)\n", m_RenderSize.X, m_RenderSize.Y);
 	return DefWindowProcW(m_WindowHandle, m_LastMessageID, wParam, lParam);
 
@@ -174,7 +143,7 @@ LRESULT greaper::gal::WinWindowImpl::WM_ENABLE_MSG(WPARAM wParam, LPARAM lParam)
 
 LRESULT greaper::gal::WinWindowImpl::WM_MOVE_MSG(WPARAM wParam, LPARAM lParam)
 {
-	m_Position.Set((int32)(int16)LOWORD(lParam), (int32)(int16)HIWORD(lParam));
+	m_Position.Set(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 #if DEBUG_WM_MOVE
 	printf_s("WM_MOVE (%d, %d)\n", m_Position.X, m_Position.Y);
 #endif
@@ -221,6 +190,8 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	m_Mode = desc.Mode;
 	m_State = desc.State;
 	m_ResizingEnabled = desc.ResizingEnabled;
+	m_MaxSize = desc.MaxSize;
+	m_MinSize = desc.MinSize;
 
 	// retrieve monitor
 	if (windowDesc.Monitor != nullptr)
@@ -240,7 +211,6 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 		m_Size = desc.Size;
 	else
 		m_Size.Set(1280, 720);
-	
 
 	switch(desc.Mode)
 	{
@@ -287,6 +257,8 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	}
 	
 	wc.style = CS_HREDRAW | CS_VREDRAW;
+	if (desc.EnableDoubleClick)
+		wc.style |= CS_DBLCLKS;
 	wc.lpfnWndProc = &WindowMessageProc;
 	wc.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
 	wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
@@ -296,9 +268,9 @@ EmptyResult WinWindowImpl::Create(const WindowDesc& windowDesc)noexcept
 	wc.hIconSm = LoadIconW(nullptr, IDI_APPLICATION);
 	wc.cbWndExtra = sizeof(this);
 
-	const auto regFailed = RegisterClassExW(&wc) == 0;
+	const auto regClassRtn = RegisterClassExW(&wc);
 
-	if (regFailed)
+	if (regClassRtn == 0)
 	{
 		const auto errCode = GetLastError();
 		return Result::CreateFailure(Format("RegisterClassExW failed with error code " I32_HEX_FMT ", error message '%S'.", errCode,
