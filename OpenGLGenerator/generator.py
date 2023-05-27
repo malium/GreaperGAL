@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ####################################################################################
 #   Copyright 2023 Marcos Sánchez Torrent.                                         #
@@ -296,7 +296,7 @@ def proc_to_name(proc, header)->str:
 	return pm.group(2).strip()
 
 def constant_type_from_number(ival:int, constant_enum:str, constant_uint64:str, constant_ienum:str, constant_int64:str):
-	if ival >= 0 and ival <= 4294967295:
+	if 0 <= ival <= 4294967295:
 		return constant_enum
 	elif ival > 4294967295:
 		return constant_uint64

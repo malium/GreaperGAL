@@ -46,7 +46,7 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 			LOCK(m_MonitorMutex);
 			m_Monitors.clear();
 			m_MainMonitor = 0;
-			prev->AccessMonitors([this](CSpan<PMonitor> span)
+			prev->AccessMonitors([this](const CSpan<PMonitor>& span)
 			{
 				const auto size = span.GetSizeFn();
 				if(m_Monitors.capacity() < size)
@@ -63,7 +63,7 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 		{
 			LOCK(m_WindowMutex);
 			m_Windows.clear();
-			prev->AccessWindows([this](CSpan<PWindow> span)
+			prev->AccessWindows([this](const CSpan<PWindow>& span)
 			{
 				const auto size = span.GetSizeFn();
 				if(m_Windows.capacity() < size)
@@ -133,7 +133,7 @@ SPtr<Monitor> WindowManager::GetMainMonitor() const
 	LOCK(m_MonitorMutex);
 	if(m_Monitors.size() > m_MainMonitor)
 		return m_Monitors[m_MainMonitor];
-	return PMonitor();
+	return {};
 }
 
 void WindowManager::AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const
