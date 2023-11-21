@@ -5,16 +5,18 @@
 
 #pragma once
 
-#ifndef GAL_GL_X11_WINDOW_H
-#define GAL_GL_X11_WINDOW_H 1
+#ifndef GAL_GL_LNX_WINDOW_H
+#define GAL_GL_LNX_WINDOW_H 1
 
-#include "X11Window.h"
+#include "LnxWindow.h"
 #include "../OpenGL/GLDefines.h"
-#include "../OpenGL/GALGLX.h"
+#define WL_EGL_PLATFORM 1
+#include "../OpenGL/GALEGL.h"
+
 
 namespace greaper::gal
 {
-	struct GLX11WindowDesc : public X11WindowDesc
+	struct GLLnxWindowDesc : public LnxWindowDesc
 	{
 	protected:
 		RenderBackend_t Backend = RenderBackend_t::OpenGL;
@@ -29,10 +31,10 @@ namespace greaper::gal
 		PWindow SharedContextWindow = PWindow();
 	};
 	
-	class GLX11Window : public X11Window
+	class GLLnxWindow : public LnxWindow
 	{
 		
 	};
 }
 
-#endif /* GAL_GL_X11_WINDOW_H */
+#endif /* GAL_GL_LNX_WINDOW_H */

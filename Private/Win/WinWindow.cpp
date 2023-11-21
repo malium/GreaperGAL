@@ -4,6 +4,9 @@
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
+
+#if PLT_WINDOWS
+
 #include "WinWindow.h"
 #include "../WindowManager.h"
 #include "../GreaperGALDLL.h"
@@ -533,3 +536,5 @@ LRESULT greaper::gal::WinWindowImpl::OnWindowProc(HWND hWnd, UINT uMsg, WPARAM w
 	
 	return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
+
+#endif // PLT_WINDOWS

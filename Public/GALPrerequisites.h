@@ -32,18 +32,14 @@ namespace greaper::gal
 	struct VkWinWindowDesc;
 #elif PLT_LINUX
 	struct LnxWindowDesc;
-	class X11Window;
-	struct X11WindowDesc;
-	class WLWindow;
-	struct WLWindowDesc;
-	class GLX11Window;
-	struct GLX11WindowDesc;
-	class GLWLWindow;
-	struct GLWLWindowDesc;
-	class VkX11Window;
-	struct VkX11WindowDesc;
-	class VkWLWindow;
-	struct VkWLWindowDesc;
+	class LnxWindow;
+	class GLLnxWindow;
+	struct GLLnxWindowDesc;
+	class VkLnxWindow;
+	struct VkLnxWindowDesc;
+	class Wayland;
+	class WL_Display;
+	class WL_Surface;
 #endif
 
 	class Monitor; using PMonitor = SPtr<Monitor>; using WMonitor = WPtr<Monitor>;

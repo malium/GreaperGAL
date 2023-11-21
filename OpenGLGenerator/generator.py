@@ -12,9 +12,9 @@ import sys
 import re
 import urllib.request
 
-generate_gl = True
-generate_glx = True
-generate_wgl = True
+generate_gl = False
+generate_glx = False
+generate_wgl = False
 generate_egl = True
 remove_gl_prefix = True
 c_compatible = False
@@ -569,7 +569,6 @@ def write_union(tabs:str, file, header):
 	# union end
 	file.write(("%s};\n"%(tabs)).encode('utf-8'))
 
-
 def generate_header(header:str):
 	filename = "GAL" + header.upper() + ".h"
 	if os.path.exists(filename):
@@ -612,8 +611,6 @@ def generate_header(header:str):
 		write_union(tabs, file, header)
 		
 		file.write(include_guards_end[header].encode('utf-8'))
-
-	return
 
 if generate_gl:
 	parse_header('gl')

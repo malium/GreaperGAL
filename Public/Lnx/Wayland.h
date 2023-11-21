@@ -5,25 +5,22 @@
 
 #pragma once
 
-#ifndef GAL_VK_X11_WINDOW_H
-#define GAL_VK_X11_WINDOW_H 1
+#ifndef GAL_WAYLAND_H
+#define GAL_WAYLAND_H 1
 
-#include "X11Window.h"
+#include <wayland-client.h>
 
 namespace greaper::gal
 {
-	struct VkX11WindowDesc : public X11WindowDesc
+	namespace Impl
 	{
-	protected:
-		RenderBackend_t Backend = RenderBackend_t::Vulkan;
-	public:
 		
-	};
-	
-	class VkX11Window : public X11Window
+	}
+
+	class Wayland
 	{
 		
 	};
 }
 
-#endif /* GAL_VK_X11_WINDOW_H */
+#endif /* GAL_WAYLAND_H */

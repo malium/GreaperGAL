@@ -1,9 +1,12 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
+
+#if PLT_WINDOWS
+
 #include "../../Public/Win/WinMonitor.h"
 #include "../WindowManager.h"
 #include "../../../GreaperCore/Public/Win/Win32User.h"
@@ -518,3 +521,5 @@ void greaper::gal::UpdateMonitorInfo(Vector<PMonitor>& monitors, sizet& mainMoni
 		}
 	}
 }
+
+#endif // PLT_WINDOWS

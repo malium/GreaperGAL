@@ -4,6 +4,9 @@
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
+
+#if PLT_WINDOWS
+
 #include "VkWinWindow.h"
 
 using namespace greaper;
@@ -125,3 +128,5 @@ EmptyResult greaper::gal::VkWinWindowImpl::_CloseWindow()
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
+
+#endif // PLT_WINDOWS

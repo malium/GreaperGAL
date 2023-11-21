@@ -10,17 +10,16 @@
 
 #include "../Base/IWindow.h"
 
-ENUMERATION(DisplayProtocol, X11, Wayland);
-
 namespace greaper::gal
 {
 	struct LnxWindowDesc : public WindowDesc
 	{
-	protected:
-		DisplayProtocol_t DisplayProtocol = DisplayProtocol_t::COUNT;
-		
-	public:
-		INLINE constexpr DisplayProtocol_t GetDisplayProtocol()const noexcept { return DisplayProtocol; }
+
+	};
+
+	class LnxWindow : public IWindow
+	{
+
 	};
 }
 

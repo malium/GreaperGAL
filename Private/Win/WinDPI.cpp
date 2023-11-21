@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -10,6 +10,9 @@
 #define GREAPER_MIN_WINDOWS_SUPPORTED 0x0A00000A
 
 #include "../ImplPrerequisites.h"
+
+#if PLT_WINDOWS
+
 #include "../../../GreaperCore/Public/Win/Win32User.h"
 #include "../../../GreaperCore/Public/Win/Win32GDI.h"
 #include "../../../GreaperCore/Public/Win/Win32ShellScalingAPI.h"
@@ -304,3 +307,5 @@ EmptyResult EnableDPI()
 	gDPIEnabled = true;
 	return Result::CreateSuccess();
 }
+
+#endif // PLT_WINDOWS

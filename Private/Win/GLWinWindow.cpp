@@ -4,6 +4,8 @@
 ***********************************************************************************/
 
 #include "../ImplPrerequisites.h"
+#if PLT_WINDOWS
+
 #include "GLWinWindow.h"
 
 using namespace greaper;
@@ -125,3 +127,5 @@ EmptyResult greaper::gal::GLWinWindowImpl::_CloseWindow()
 {
 	return Result::CreateFailure("Not implemented"sv);
 }
+
+#endif // PLT_WINDOWS

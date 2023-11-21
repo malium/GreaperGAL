@@ -5,14 +5,14 @@
 
 #pragma once
 
-#ifndef GAL_VK_WL_WINDOW_H
-#define GAL_VK_WL_WINDOW_H 1
+#ifndef GAL_VK_LNX_WINDOW_H
+#define GAL_VK_LNX_WINDOW_H 1
 
-#include "WLWindow.h"
+#include "LnxWindow.h"
 
 namespace greaper::gal
 {
-	struct VkWLWindowDesc : public WLWindowDesc
+	struct VkLnxWindowDesc : public LnxWindowDesc
 	{
 	protected:
 		RenderBackend_t Backend = RenderBackend_t::Vulkan;
@@ -20,10 +20,10 @@ namespace greaper::gal
 		
 	};
 	
-	class VkWLWindow : public WLWindow
+	class VkLnxWindow : public LnxWindow
 	{
 		
 	};
 }
 
-#endif /* GAL_VK_WL_WINDOW_H */
+#endif /* GAL_VK_LNX_WINDOW_H */
